@@ -7,6 +7,7 @@
 
 
 #include "Cell.h"
+#include "Country.h"
 
 class Grid {
 public:
@@ -22,12 +23,17 @@ public:
 
     Cell **getCells() const;
 
+    Point place_country(Country country) const;
 
 private:
     int number_of_active_rows;
     int number_of_active_columns;
     Cell **cells;
-
+    void fit_country(Cell cell, Country country) const;
+    void try_fit_country(Cell cell, Country country) const;
+    void try_fit_country_width_wise(Cell cell, Country country) const;
+    void try_fit_country_length_wise(Cell cell, Country country) const;
+    Cell **expand(Cell toExpand, Country country, Cell toFill) const;
 };
 
 

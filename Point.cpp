@@ -16,3 +16,6 @@ float Point::getY() const {
 
 Point::Point() : x(-1), y(-1){}
 
+bool Point::equals(Point a) const {
+    return (a.getX() == getX() && a.getY() == getY());
+}

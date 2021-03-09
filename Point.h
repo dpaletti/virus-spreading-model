@@ -16,7 +16,7 @@ public:
 
     float getY() const;
 
-
+    bool equals(Point a) const;
 private:
     float x, y;
 

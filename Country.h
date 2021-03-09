@@ -12,7 +12,7 @@
 class Country {
 public:
 
-    Country(const std::string &name, float length, float width, const Point &anchorPoint);
+    Country(const std::string &name, float length, float width);
 
     const std::string &getName() const;
 

@@ -41,3 +41,7 @@ void Cell::setIsOccupied(bool isOccupied) {
 }
 
 Cell::Cell() {}
+
+bool Cell::equals(Cell a) {
+    return a.getAnchorPoint().equals(getAnchorPoint());
+}

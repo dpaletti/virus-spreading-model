@@ -30,6 +30,8 @@ public:
 
     void setIsOccupied(bool isOccupied);
 
+    bool equals(Cell a);
+
 private:
     Point anchor_point;
     float length;
