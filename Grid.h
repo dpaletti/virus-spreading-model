@@ -29,11 +29,16 @@ private:
     int number_of_active_rows;
     int number_of_active_columns;
     Cell **cells;
-    void fit_country(Cell cell, Country country) const;
-    void try_fit_country(Cell cell, Country country) const;
-    void try_fit_country_width_wise(Cell cell, Country country) const;
-    void try_fit_country_length_wise(Cell cell, Country country) const;
-    Cell **expand(Cell toExpand, Country country, Cell toFill) const;
+    //add row and column after a country has been added
+    void add_row(int cell_to_fill_row, int cell_to_fill_column, Country country);
+    void add_column(int cell_to_fill_row, int cell_to_fill_column, Country country);
+
+    bool fit_exact (int cell_to_fill_row, int cell_to_fill_column, Country country);
+    bool fit_length (int cell_to_fill_row, int cell_to_fill_column, Country country);
+    bool fit_width (int cell_to_fill_row, int cell_to_fill_column, Country country);
+    bool fit_length_width (int cell_to_fill_row, int cell_to_fill_column, Country country);
+
+
 };
 
 
