@@ -1,7 +1,3 @@
-//
-// Created by dpaletti on 2021-03-09.
-//
-
 #ifndef VIRUS_SPREADING_MODEL_COUNTRY_H
 #define VIRUS_SPREADING_MODEL_COUNTRY_H
 

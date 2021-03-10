@@ -1,7 +1,3 @@
-//
-// Created by dpaletti on 2021-03-09.
-//
-
 #ifndef VIRUS_SPREADING_MODEL_POINT_H
 #define VIRUS_SPREADING_MODEL_POINT_H
 

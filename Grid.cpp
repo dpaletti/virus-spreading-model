@@ -1,9 +1,7 @@
-//
-// Created by dpaletti on 2021-03-09.
-//
-
 #include "Grid.h"
 #include <list>
+#include <stdexcept>
+
 
 Grid::Grid(int number_of_countries, float world_length, float world_width){
     number_of_active_rows = 1;
@@ -32,23 +30,32 @@ Cell **Grid::getCells() const {
     return cells;
 }
 
-Point Grid::place_country(Country country) const {
+Point Grid::place_country(Country country) {
     for(int i=0; i< getNumberOfActiveRows(); i++){
         for(int j=0; j< getNumberOfActiveColumns(); j++){
-            if(country.getWidth() <= getCells()[i][j].getWidth() && country.getLength() <= getCells()[i][j].getLength()){
+            if(country.getWidth() <= cells[i][j].getWidth() && country.getLength() <= cells[i][j].getLength()){
                 // country fits in exactly one cell
+                if (fit_exact(i, j, country))
+                    return cells[i][j].getAnchorPoint();
             }
-            else if(country.getWidth() > getCells()[i][j].getWidth() && country.getLength() <= getCells()[i][j].getLength()){
+            else if(country.getWidth() > cells[i][j].getWidth() && country.getLength() <= cells[i][j].getLength()){
                 // country fits length-wise but not width-wise
+                if (fit_length(i, j, country))
+                    return cells[i][j].getAnchorPoint();
             }
-            else if(country.getWidth() <= getCells()[i][j].getWidth() && country.getLength() > getCells()[i][j].getLength()){
+            else if(country.getWidth() <= cells[i][j].getWidth() && country.getLength() > cells[i][j].getLength()){
                 // country fits width-wise but not length wise
+                if (fit_width(i, j, country))
+                    return cells[i][j].getAnchorPoint();
             }
             else{
-
+                if (fit_length_width(i, j, country))
+                    return cells[i][j].getAnchorPoint();
             }
         }
     }
+
+    throw std::runtime_error("Could not place country " + country.getName() + ".");
 }
 
 void Grid::add_row(int cell_to_fill_row, int cell_to_fill_column, Country country) {
@@ -97,6 +104,30 @@ bool Grid::fit_exact(int cell_to_fill_row, int cell_to_fill_column, Country coun
 }
 
 bool Grid::fit_length(int cell_to_fill_row, int cell_to_fill_column, Country country) {
+    float acc = cells[cell_to_fill_row][cell_to_fill_column].getLength();
+    std::list<Cell> filled_cells {};
+    Cell current_cell;
+    for (int row = cell_to_fill_row + 1; row < number_of_active_rows; row++){
+        current_cell = cells[row][cell_to_fill_column];
+        if (!current_cell.isOccupied()){
+            acc += current_cell.getWidth();
+            filled_cells.push_back(current_cell); //append
+            if (acc >= country.getWidth()){
+                if (current_cell.getLength() != country.getLength())
+                    add_column(row, cell_to_fill_column, country);
+
+                if (acc != country.getWidth())
+                    add_row(row, cell_to_fill_column, country);
+
+                for (auto &item : filled_cells) {
+                    item.setIsOccupied(true);
+                }
+                return true;
+            }
+        }
+        else
+            return false;
+    }
     return false;
 }
 
@@ -106,28 +137,87 @@ bool Grid::fit_width(int cell_to_fill_row, int cell_to_fill_column, Country coun
     Cell current_cell;
     for (int col = cell_to_fill_column + 1; col < number_of_active_columns; col++){
         current_cell = cells[cell_to_fill_row][col];
-        acc += current_cell.getLength();
-        filled_cells.push_back(current_cell); //append
-        if (acc >= country.getLength()){
-            if (current_cell.getWidth() != country.getWidth())
-                add_row(cell_to_fill_row, col, country);
+        if (!current_cell.isOccupied()){
+            acc += current_cell.getLength();
+            filled_cells.push_back(current_cell); //append
+            if (acc >= country.getLength()){
+                if (current_cell.getWidth() != country.getWidth())
+                    add_row(cell_to_fill_row, col, country);
 
-            if (acc != country.getLength())
-                add_column(cell_to_fill_row, col, country);
+                if (acc != country.getLength())
+                    add_column(cell_to_fill_row, col, country);
 
-            for (auto &item : filled_cells) {
-                item.setIsOccupied(true);
+                for (auto &item : filled_cells) {
+                    item.setIsOccupied(true);
+                }
+                return true;
             }
-            return true;
         }
-        else if (current_cell.isOccupied())
+
+        else
             return false;
     }
     return false;
 }
 
 bool Grid::fit_length_width(int cell_to_fill_row, int cell_to_fill_column, Country country) {
-    return false;
+    float acc_length = cells[cell_to_fill_row][cell_to_fill_column].getLength();
+    float acc_width = cells[cell_to_fill_row][cell_to_fill_column].getWidth();
+    std::list<std::pair<Cell, std::pair<int, int>>> filled_cells_length {};
+    std::list<Cell> filled_cells_width {};
+    Cell current_cell;
+    for (int col = cell_to_fill_column + 1; col < number_of_active_columns; col++) {
+        current_cell = cells[cell_to_fill_row][col];
+        if (!current_cell.isOccupied()){
+            acc_length += current_cell.getLength();
+            std::pair<int,int> index;
+            index.first = cell_to_fill_row;
+            index.second = col;
+            std::pair<Cell, std::pair<int, int>> list_item;
+            list_item.first = current_cell;
+            list_item.second = index;
+            filled_cells_length.push_back(list_item);
+            if (acc_length >= country.getLength())
+                break;
+        }
+        else
+            return false;
+    }
+    if (acc_length < country.getLength())
+        return false;
+
+    int last_col = -1;
+    int last_row = -1;
+    for (auto &item : filled_cells_length) {
+        for (int row = cell_to_fill_row + 1; row < number_of_active_rows; row++){
+            current_cell = cells[row][item.second.second]; //col is second item
+            if (!current_cell.isOccupied()){
+                acc_width += current_cell.getWidth();
+                filled_cells_width.push_back(current_cell);
+                if (acc_width >= country.getWidth()){
+                    last_col = item.second.second;
+                    last_row = row;
+                    break;
+                }
+            }
+            else
+                return false;
+            if (acc_width < country.getWidth())
+                return false;
+        }
+    }
+
+    if (acc_width != country.getWidth())
+        add_row(last_row, last_col, country);
+    if (acc_length != country.getLength())
+        add_column(last_row, last_col, country);
+    for (auto &item : filled_cells_length)
+        item.first.setIsOccupied(true);
+
+    for (auto &item : filled_cells_width)
+        item.setIsOccupied(true);
+
+    return true;
 }
 
 

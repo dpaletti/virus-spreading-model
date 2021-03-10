@@ -23,7 +23,7 @@ public:
 
     Cell **getCells() const;
 
-    Point place_country(Country country) const;
+    Point place_country(Country country);
 
 private:
     int number_of_active_rows;

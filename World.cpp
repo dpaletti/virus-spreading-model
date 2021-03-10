@@ -1,7 +1,5 @@
-//
-// Created by dpaletti on 2021-03-09.
-//
-
+#include <stdexcept>
+#include <iostream>
 #include "World.h"
 #include "Cell.h"
 #include "Grid.h"
@@ -23,7 +21,11 @@ void World::place_countries() const{
     Grid grid = Grid(number_of_countries, getLength(), getWidth());
     for(int i = 0; i < number_of_countries; i++){
         Country current_country = countries[i];
-        current_country.setAnchorPoint(grid.place_country(current_country));
+        try {
+            current_country.setAnchorPoint(grid.place_country(current_country));
+        } catch (const std::runtime_error& e){
+            std::cout << "Country " << current_country.getName() << " skipping placement." << std::endl;
+        }
     }
 }
 

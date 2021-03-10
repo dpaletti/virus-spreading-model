@@ -1,7 +1,3 @@
-//
-// Created by dpaletti on 2021-03-09.
-//
-
 #include "Cell.h"
 
 Cell::Cell(const Point &anchorPoint, float length, float width, bool isOccupied) : anchor_point(anchorPoint),
