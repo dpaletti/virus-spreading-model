@@ -20,11 +20,11 @@ void World::place_countries() const{
     int number_of_countries = getCountries().size();
     Grid grid = Grid(number_of_countries, getLength(), getWidth());
     for(int i = 0; i < number_of_countries; i++){
-        Country current_country = countries[i];
+        auto *current_country = (Country*) &countries[i];
         try {
-            current_country.setAnchorPoint(grid.place_country(current_country));
+            current_country->setAnchorPoint(grid.place_country(*current_country));
         } catch (const std::runtime_error& e){
-            std::cout << "Country " << current_country.getName() << " skipping placement." << std::endl;
+            std::cout << "Country " << current_country->getName() << " skipping placement." << std::endl;
         }
     }
 }

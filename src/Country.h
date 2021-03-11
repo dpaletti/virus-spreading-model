@@ -4,11 +4,16 @@
 
 #include "Point.h"
 #include <string>
+#include <vector>
+#include <list>
+
 
 class Country {
 public:
 
     Country(const std::string &name, float length, float width);
+
+    Country();
 
     const std::string &getName() const;
 
@@ -20,9 +25,11 @@ public:
 
     void setAnchorPoint(const Point &anchorPoint);
 
+    static std::vector<Country>buildCountries(std::list<std::pair<float, float>> countries);
+
 private:
     std::string name;
-    float length, width;
+    float length{}, width{};
     Point anchor_point;
 };
 

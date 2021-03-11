@@ -1,7 +1,12 @@
 #include<iostream>
 #include <mpi.h>
+#include <vector>
+#include "InputParser.h"
+#include "Country.h"
+#include "World.h"
 
 int main(int argc, char** argv) {
+    /**
     // Initialize the MPI environment
     MPI_Init(NULL, NULL);
 
@@ -24,4 +29,11 @@ int main(int argc, char** argv) {
 
     // Finalize the MPI environment.
     MPI_Finalize();
+    **/
+    InputParser inputParser = InputParser("../config/input.json");
+    Country c;
+    std::vector<Country> countries = c.buildCountries(inputParser.getCountries());
+    std::pair<float, float> world_size = inputParser.getWorldSize();
+    World world = World(world_size.second, world_size.first, countries);
+    world.printWorld();
 }

@@ -6,8 +6,7 @@
 Grid::Grid(int number_of_countries, float world_length, float world_width){
     number_of_active_rows = 1;
     number_of_active_columns = 1;
-    Cell temp[number_of_countries+1][number_of_countries+1];
-    cells = (Cell**)temp;
+    cells = std::vector<std::vector<Cell>>(number_of_countries+1, std::vector<Cell>(number_of_countries+1));
     cells[0][0] = Cell(Point(0, 0), world_length, world_width, false);}
 
 int Grid::getNumberOfActiveRows() const {
@@ -26,7 +25,7 @@ void Grid::setNumberOfActiveColumns(int numberOfActiveColumns) {
     number_of_active_columns = numberOfActiveColumns;
 }
 
-Cell **Grid::getCells() const {
+std::vector<std::vector<Cell>>Grid::getCells() const {
     return cells;
 }
 

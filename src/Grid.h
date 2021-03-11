@@ -21,14 +21,14 @@ public:
 
     void setNumberOfActiveColumns(int numberOfActiveColumns);
 
-    Cell **getCells() const;
+    std::vector<std::vector<Cell>> getCells() const;
 
     Point place_country(Country country);
 
 private:
     int number_of_active_rows;
     int number_of_active_columns;
-    Cell **cells;
+    std::vector<std::vector<Cell>> cells;
     //add row and column after a country has been added
     void add_row(int cell_to_fill_row, int cell_to_fill_column, Country country);
     void add_column(int cell_to_fill_row, int cell_to_fill_column, Country country);
