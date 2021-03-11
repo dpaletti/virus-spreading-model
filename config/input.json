@@ -1,0 +1,25 @@
+{
+  "individuals_number": 5,
+  "infected_number": 1,
+  "world": {
+    "width": 10,
+    "length": 10
+  },
+  "countries": [
+    {
+      "width": 1,
+      "length": 1
+    },
+    {
+      "width": 2,
+      "length": 3
+    },
+    {
+      "width": 4,
+      "length": 1
+    }
+  ],
+  "velocity": 10,
+  "maximum_spreading_distance": 5,
+  "time_step": 5
+}
