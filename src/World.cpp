@@ -37,10 +37,10 @@ const std::vector<Country> &World::getCountries() const {
 }
 
 void World::printWorld() {
-    std::cout << "This world has a length of " << length << "and a width of " << width << "." << std::endl;
+    std::cout << "This world has a length of " << length << " and a width of " << width << "." << std::endl;
     std::cout << "It contains the following countries: " << std::endl;
     for (auto &country : countries) {
-        std::cout << "Country " << &country << "has length of " << country.getLength() << " and a width of " << country.getWidth() << " is anchored in " << country.getAnchorPoint().toString() << std::endl;
+        std::cout << "Country " << country.getName() << "has length of " << country.getLength() << " and a width of " << country.getWidth() << " is anchored in " << country.getAnchorPoint().toString() << std::endl;
     }
 
 }
