@@ -35,7 +35,7 @@ std::vector<Country> Country::buildCountries(std::list<std::pair<float, float>> 
     std::vector<Country> out {};
     int i = 0;
     for(auto const& value: countries) {
-        out.emplace_back("country-" + std::to_string(i), value.second, value.first);
+        out.emplace_back(Country("country-" + std::to_string(i), value.second, value.first));
         i++;
     }
     return out;

@@ -30,8 +30,8 @@ private:
     int number_of_active_columns;
     std::vector<std::vector<Cell>> cells;
     //add row and column after a country has been added
-    void add_row(int cell_to_fill_row, int cell_to_fill_column, Country country);
-    void add_column(int cell_to_fill_row, int cell_to_fill_column, Country country);
+    void add_row(int cell_to_fill_row, int cell_to_fill_column, Country country, float acc=0);
+    void add_column(int cell_to_fill_row, int cell_to_fill_column, Country country, float acc=0);
 
     bool fit_exact (int cell_to_fill_row, int cell_to_fill_column, Country country);
     bool fit_length (int cell_to_fill_row, int cell_to_fill_column, Country country);

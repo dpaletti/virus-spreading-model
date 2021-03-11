@@ -57,28 +57,30 @@ Point Grid::place_country(Country country) {
     throw std::runtime_error("Could not place country " + country.getName() + ".");
 }
 
-void Grid::add_row(int cell_to_fill_row, int cell_to_fill_column, Country country) {
+void Grid::add_row(int cell_to_fill_row, int cell_to_fill_column, Country country, float acc=0) {
     for (int row = number_of_active_rows - 1; row >= cell_to_fill_row; row--){
-        for (int col = 0; col <= cell_to_fill_column; col++)
+        for (int col = 0; col <= cell_to_fill_column + 1; col++)
             cells[row + 1][col] = cells[row][col];
     }
+    float cell_to_fill_width = cells[cell_to_fill_row][cell_to_fill_column].getWidth();
     for (int col = 0; col < number_of_active_columns; col++){
         Cell *cell_beside = &cells[cell_to_fill_row + 1][col];
-        cell_beside->setWidth(cells[cell_to_fill_row][cell_to_fill_column].getWidth() - country.getWidth());
+        cell_beside->setWidth(cell_to_fill_width - country.getWidth() - acc);
         cell_beside->setAnchorPoint(Point(cell_beside->getAnchorPoint().getX(), cell_beside->getAnchorPoint().getY() + country.getWidth()));
         cells[cell_to_fill_row][col].setWidth(country.getWidth());
     }
     number_of_active_rows++;
 }
 
-void Grid::add_column(int cell_to_fill_row, int cell_to_fill_column, Country country) {
+void Grid::add_column(int cell_to_fill_row, int cell_to_fill_column, Country country, float acc=0) {
     for (int col = number_of_active_columns - 1; col >= cell_to_fill_column; col--){
-        for (int row = 0; row <= cell_to_fill_row; row++)
+        for (int row = 0; row <= cell_to_fill_row + 1; row++)
             cells[row][col + 1] = cells[row][col];
     }
+    float cell_to_fill_length = cells[cell_to_fill_row][cell_to_fill_column].getLength();
     for (int row = 0; row < number_of_active_rows; row++){
         Cell *cell_beside = &cells[row][cell_to_fill_column + 1];
-        cell_beside->setLength(cells[cell_to_fill_row][cell_to_fill_column].getLength() - country.getLength());
+        cell_beside->setLength(cell_to_fill_length - country.getLength() - acc);
         cell_beside->setAnchorPoint( Point ((cell_beside->getAnchorPoint()).getX() + country.getLength(), cell_beside->getAnchorPoint().getY()));
         cells[row][cell_to_fill_column].setLength(country.getLength());
     }
@@ -113,7 +115,7 @@ bool Grid::fit_length(int cell_to_fill_row, int cell_to_fill_column, Country cou
             filled_cells.push_back(current_cell); //append
             if (acc >= country.getWidth()){
                 if (current_cell.getLength() != country.getLength())
-                    add_column(row, cell_to_fill_column, country);
+                    add_column(row, cell_to_fill_column, country, acc);
 
                 if (acc != country.getWidth())
                     add_row(row, cell_to_fill_column, country);
@@ -141,7 +143,7 @@ bool Grid::fit_width(int cell_to_fill_row, int cell_to_fill_column, Country coun
             filled_cells.push_back(current_cell); //append
             if (acc >= country.getLength()){
                 if (current_cell.getWidth() != country.getWidth())
-                    add_row(cell_to_fill_row, col, country);
+                    add_row(cell_to_fill_row, col, country, acc);
 
                 if (acc != country.getLength())
                     add_column(cell_to_fill_row, col, country);
@@ -207,9 +209,9 @@ bool Grid::fit_length_width(int cell_to_fill_row, int cell_to_fill_column, Count
     }
 
     if (acc_width != country.getWidth())
-        add_row(last_row, last_col, country);
+        add_row(last_row, last_col, country, acc_width);
     if (acc_length != country.getLength())
-        add_column(last_row, last_col, country);
+        add_column(last_row, last_col, country, acc_length);
     for (auto &item : filled_cells_length)
         item.first.setIsOccupied(true);
 
