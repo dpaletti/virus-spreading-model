@@ -11,7 +11,7 @@ public:
     const std::vector<Country> &getCountries() const;
 
 public:
-    World(float length, float width, const std::vector<Country> &countries);
+    World(float length, float width, std::vector<Country> countries);
 
     float getLength() const;
 

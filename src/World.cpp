@@ -1,7 +1,7 @@
 #include <stdexcept>
 #include <iostream>
+#include <utility>
 #include "World.h"
-#include "Cell.h"
 #include "Grid.h"
 
 
@@ -29,8 +29,8 @@ void World::place_countries() const{
     }
 }
 
-World::World(float length, float width, const std::vector<Country> &countries) : length(length), width(width),
-                                                                                 countries(countries) {}
+World::World(float length, float width, std::vector<Country> countries) : length(length), width(width),
+                                                                                 countries(std::move(countries)) {place_countries();}
 
 const std::vector<Country> &World::getCountries() const {
     return countries;
