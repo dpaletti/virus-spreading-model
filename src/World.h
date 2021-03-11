@@ -20,6 +20,8 @@ public:
 
     void place_countries() const;
 
+    void printWorld();
+
 private:
     float length, width;
     std :: vector<Country> countries;

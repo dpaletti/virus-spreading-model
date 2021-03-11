@@ -16,7 +16,7 @@ public:
 
     float getWidth() const;
 
-    const Point &getAnchorPoint() const;
+    Point &getAnchorPoint();
 
     void setAnchorPoint(const Point &anchorPoint);
 

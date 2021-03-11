@@ -13,7 +13,7 @@ float Country::getWidth() const {
     return width;
 }
 
-const Point &Country::getAnchorPoint() const {
+Point &Country::getAnchorPoint() {
     return anchor_point;
 }
 

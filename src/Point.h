@@ -1,6 +1,7 @@
 #ifndef VIRUS_SPREADING_MODEL_POINT_H
 #define VIRUS_SPREADING_MODEL_POINT_H
 
+#include <string>
 
 class Point {
 public:
@@ -13,6 +14,9 @@ public:
     float getY() const;
 
     bool equals(Point a) const;
+
+    std::string toString();
+
 private:
     float x, y;
 
