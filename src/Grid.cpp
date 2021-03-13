@@ -57,7 +57,7 @@ Point Grid::place_country(Country country) {
     throw std::runtime_error("Could not place country " + country.getName() + ".");
 }
 
-void Grid::add_row(int cell_to_fill_row, int cell_to_fill_column, Country country, float acc=0) {
+void Grid::add_row(int cell_to_fill_row, int cell_to_fill_column, Country country, float acc) {
     for (int row = number_of_active_rows - 1; row >= cell_to_fill_row; row--){
         for (int col = 0; col <= cell_to_fill_column + 1; col++)
             cells[row + 1][col] = cells[row][col];
@@ -72,7 +72,7 @@ void Grid::add_row(int cell_to_fill_row, int cell_to_fill_column, Country countr
     number_of_active_rows++;
 }
 
-void Grid::add_column(int cell_to_fill_row, int cell_to_fill_column, Country country, float acc=0) {
+void Grid::add_column(int cell_to_fill_row, int cell_to_fill_column, Country country, float acc) {
     for (int col = number_of_active_columns - 1; col >= cell_to_fill_column; col--){
         for (int row = 0; row <= cell_to_fill_row + 1; row++)
             cells[row][col + 1] = cells[row][col];
