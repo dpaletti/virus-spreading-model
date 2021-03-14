@@ -6,6 +6,8 @@
 #include "InputParser.h"
 #include "Country.h"
 #include "World.h"
+#include "rapidjson/prettywriter.h" // for stringify JSON
+#include "Infected.h"
 
 int main(int argc, char** argv) {
 
@@ -49,19 +51,35 @@ int main(int argc, char** argv) {
 
     int day_length = std::floor(86400 / inputParser.getTimeStep());
     MPI_Barrier(MPI_COMM_WORLD);
-    std::vector<std::pair<std::string, Point>> list_of_infected;
+    std::vector<Infected> list_of_infected;
+
     Individual current_individual;
+    rapidjson::StringBuffer sb;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
 
     for(int step = 0; step < day_length; step++){
         world.updatePositions();
         for (int i = 0; i < individuals; i++){
             current_individual = world.getIndividuals()[i];
             if (current_individual.isInfected1()){
-                list_of_infected.emplace_back(current_individual.getId(), current_individual.getPosition());
+                list_of_infected.emplace_back(current_individual.getPosition(), current_individual.getId());
             }
         }
-        //list of infected needs to be serialized
-        //MPI_Bcast(&list_of_infected, //size of the string we just created, char, ... );
+        writer.StartArray();
+        for (const auto &item : list_of_infected) {
+            item.Serialize(writer);
+        }
+        writer.EndArray();
+
+
+        MPI_Bcast((void *) sb.GetString(), sb.GetSize(), MPI_CHAR, my_rank, MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD); //TODO: check correctness of this barrier
+        //TODO:this does not work, change it
+        for (int proc=0; proc < world_size;proc++){
+            if (proc != my_rank)
+                MPI_Send((void *) sb.GetString(), sb.GetSize(), MPI_CHAR, my_rank,0, MPI_COMM_WORLD);
+
+        }
     }
 
     MPI_Finalize();

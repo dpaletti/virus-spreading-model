@@ -21,3 +21,14 @@ std::string Point::toString() {
     std::string point = "(" +  std::to_string(x) + "," + std::to_string(y) +")";
     return point;
 }
+
+template<typename Writer>
+void Point::Serialize(Writer &writer) const {
+    writer.StartObject();
+    writer.String("x");
+    writer.Double((double)x);
+    writer.String("y");
+    writer.Double((double)y);
+    writer.EndObject();
+
+}

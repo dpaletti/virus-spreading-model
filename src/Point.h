@@ -2,6 +2,9 @@
 #define VIRUS_SPREADING_MODEL_POINT_H
 
 #include <string>
+#include <vector>
+#include "rapidjson/prettywriter.h" // for stringify JSON
+#include <exception>
 
 class Point {
 public:
@@ -16,6 +19,9 @@ public:
     bool equals(Point a) const;
 
     std::string toString();
+
+    template <typename Writer>
+    void Serialize(Writer& writer) const;
 
 private:
     float x, y;
