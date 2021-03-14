@@ -11,7 +11,7 @@
 class Country {
 public:
 
-    Country(const std::string &name, float length, float width);
+    Country(std::string name, float length, float width);
 
     Country();
 
@@ -32,6 +32,7 @@ private:
     float length{}, width{};
     Point anchor_point;
 };
+
 
 
 #endif //VIRUS_SPREADING_MODEL_COUNTRY_H

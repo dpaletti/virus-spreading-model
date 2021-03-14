@@ -43,6 +43,6 @@ float InputParser::getMaximumSpreadingDistance() {
     return document["maximum_spreading_distance"].GetFloat();
 }
 
-int InputParser::getTimeStep() {
-    return document["time_step"].GetInt();
+float InputParser::getTimeStep() {
+    return document["time_step"].GetFloat();
 }

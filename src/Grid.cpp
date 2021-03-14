@@ -107,7 +107,7 @@ bool Grid::fit_exact(int cell_to_fill_row, int cell_to_fill_column, Country coun
 }
 
 bool Grid::fit_length(int cell_to_fill_row, int cell_to_fill_column, Country country) {
-    float acc = cells[cell_to_fill_row][cell_to_fill_column].getLength();
+    float acc = cells[cell_to_fill_row][cell_to_fill_column].getWidth();
     std::list<Cell*> filled_cells {};
     filled_cells.push_back(&cells[cell_to_fill_row][cell_to_fill_column]);
     Cell* current_cell;
@@ -209,9 +209,9 @@ bool Grid::fit_length_width(int cell_to_fill_row, int cell_to_fill_column, Count
             }
             else
                 return false;
-            if (acc_width < country.getWidth())
-                return false;
         }
+        if (acc_width < country.getWidth())
+            return false;
     }
 
     if (acc_width != country.getWidth())

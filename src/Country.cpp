@@ -1,7 +1,8 @@
 #include "Country.h"
 #include <stdexcept>
+#include <utility>
 
-const std::string &Country::getName() const {
+ const std::string &Country::getName() const{
     return name;
 }
 
@@ -25,7 +26,7 @@ void Country::setAnchorPoint(const Point &anchorPoint) {
     anchor_point = anchorPoint;
 }
 
-Country::Country(const std::string &name, float length, float width) :  name(name),
+Country::Country(std::string name, float length, float width) :  name(std::move(name)),
                                                                         length(length),
                                                                         width(width),
                                                                         anchor_point()
@@ -42,3 +43,10 @@ std::vector<Country> Country::buildCountries(std::list<std::pair<float, float>> 
 }
 
 Country::Country() = default;
+
+
+bool operator==(const Country &c1, const Country& c2) {
+    return c1.getName() == c2.getName();
+}
+
+

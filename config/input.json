@@ -7,16 +7,24 @@
   },
   "countries": [
     {
-      "width": 2,
-      "length": 3
-    },
-    {
-      "width": 6,
+      "width": 4,
       "length": 6
     },
     {
+      "width": 5,
+      "length": 5
+    },
+    {
+      "width": 3,
+      "length": 4
+    },
+    {
       "width": 4,
-      "length": 1
+      "length": 3
+    },
+    {
+      "width": 4,
+      "length": 3
     }
   ],
   "velocity": 10,

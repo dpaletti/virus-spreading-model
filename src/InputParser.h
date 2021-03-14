@@ -14,7 +14,7 @@ public:
     std::list<std::pair<float, float>> getCountries();
     float getVelocity();
     float getMaximumSpreadingDistance();
-    int getTimeStep();
+    float getTimeStep();
 
 private:
     rapidjson::Document document;

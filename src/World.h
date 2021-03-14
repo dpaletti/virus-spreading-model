@@ -11,21 +11,23 @@ public:
     const std::vector<Country> &getCountries() const;
 
 public:
-    World(float length, float width, std::vector<Country> countries);
+    World(float length, float width, std::vector<Country> countries, float velocity, float maximumSpreadingDistance, float timeStep);
 
     float getLength() const;
 
     float getWidth() const;
 
 
-    void place_countries() const;
+    void place_countries();
 
     void printWorld();
 
 private:
+    float velocity;
+    float maximumSpreadingDistance;
+    float timeStep;
     float length, width;
-    std :: vector<Country> countries;
-    void place_country(Country country, Grid grid) const;
+    std::vector<Country> countries;
 
 };
 

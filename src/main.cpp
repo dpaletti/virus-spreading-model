@@ -31,9 +31,8 @@ int main(int argc, char** argv) {
     MPI_Finalize();
     **/
     InputParser inputParser = InputParser("../config/input.json");
-    Country c;
-    std::vector<Country> countries = c.buildCountries(inputParser.getCountries());
+    std::vector<Country> countries = Country::buildCountries(inputParser.getCountries());
     std::pair<float, float> world_size = inputParser.getWorldSize();
-    World world = World(world_size.second, world_size.first, countries);
+    World world = World(world_size.second, world_size.first, countries, inputParser.getVelocity(), inputParser.getMaximumSpreadingDistance(), inputParser.getTimeStep());
     world.printWorld();
 }
