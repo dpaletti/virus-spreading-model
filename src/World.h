@@ -5,6 +5,7 @@
 #include <vector>
 #include "Country.h"
 #include "Grid.h"
+#include "Individual.h"
 
 class World {
 public:
@@ -17,16 +18,28 @@ public:
 
     float getWidth() const;
 
-
     void place_countries();
 
+    const std::vector<Individual> &getIndividuals() const;
+
     void printWorld();
+
+    void addIndividuals(int number_of_individuals, int number_of_infected, int rank);
+
+    void updatePositions();
 
 private:
     float velocity;
     float maximumSpreadingDistance;
     float timeStep;
     float length, width;
+
+    //seconds
+    const int susceptible_to_infected = 600; //10 minutes
+    const int infected_to_immune = 864000; //10 days
+    const int immune_to_susceptible = 7776000; //3 months
+
+    std::vector<Individual> individuals;
     std::vector<Country> countries;
 
 };

@@ -45,9 +45,32 @@ void World::printWorld() {
     std::cout << "This world has a length of " << length << " and a width of " << width << "." << std::endl;
     std::cout << "It contains the following countries: " << std::endl;
     for (auto &country : countries) {
-        std::cout << "Country " << country.getName() << "has length of " << country.getLength() << " and a width of " << country.getWidth() << " is anchored in " << country.getAnchorPoint().toString() << std::endl;
+        std::cout << "Country " << country.getName() << " has length of " << country.getLength() << " and a width of " << country.getWidth() << " is anchored in " << country.getAnchorPoint().toString() << std::endl;
     }
 
+}
+
+void World::addIndividuals(int number_of_individuals, int number_of_infected, int rank) {
+    for (int i = 0; i < number_of_individuals; i++){
+        individuals.emplace_back(i <= number_of_infected, length, width, std::to_string(rank) + "-" + std::to_string(i));
+    }
+}
+
+void World::updatePositions() {
+    float x, y;
+    for (int i = 0; i < individuals.size(); i++){
+        x = individuals[i].getPosition().getX() + velocity * timeStep * individuals[i].getDirection().getX();
+        y = individuals[i].getPosition().getY() + velocity * timeStep * individuals[i].getDirection().getY();
+        if (x > length || y > width){
+            individuals[i].relocate(length, width);
+            continue;
+        }
+        individuals[i].setPosition(Point(x, y));
+    }
+}
+
+const std::vector<Individual> &World::getIndividuals() const {
+    return individuals;
 }
 
 
