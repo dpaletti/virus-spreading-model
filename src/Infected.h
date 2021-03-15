@@ -4,6 +4,7 @@
 
 
 #include "Point.h"
+#include "rapidjson/document.h"
 
 class Infected {
 private:
@@ -16,6 +17,8 @@ public:
 
     template <typename Writer>
     void Serialize(Writer& writer) const;
+    void Deserialize(const rapidjson::Value &obj);
+
 };
 
 

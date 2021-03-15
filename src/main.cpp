@@ -70,15 +70,53 @@ int main(int argc, char** argv) {
             item.Serialize(writer);
         }
         writer.EndArray();
+        std::string buf;
+        MPI_Status status;
+        int messageSize;
+        rapidjson::Document document;
+        if(my_rank == 0) {
+            MPI_Send((void *) sb.GetString(), sb.GetSize(), MPI_CHAR, my_rank + 1, 0, MPI_COMM_WORLD);
+            MPI_Probe(world_size-1,0,MPI_COMM_WORLD,&status);
+            MPI_Get_count(&status,MPI_CHAR,&messageSize);
+            MPI_Recv(&buf,messageSize,MPI_CHAR,world_size - 1,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        }else{
+            MPI_Probe(my_rank-1,0,MPI_COMM_WORLD,&status);
+            MPI_Get_count(&status,MPI_CHAR,&messageSize);
+            MPI_Recv(&buf,messageSize,MPI_CHAR,my_rank - 1,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+            //TODO: Deserialize message and unite it with
+            document.Parse(buf.c_str());
+            for (rapidjson::Value :: ConstMemberIterator iterator = document.MemberBegin(); iterator != document.MemberEnd();++iterator) {
+                auto *temp_infected = new Infected();
+                temp_infected->Deserialize(iterator->value);
+                list_of_infected.push_back(*temp_infected);
+            }
+            writer.StartArray();
+            for (const auto &item : list_of_infected) {
+                item.Serialize(writer);
+            }
+            writer.EndArray();
+            MPI_Send((void *) sb.GetString(), sb.GetSize(), MPI_CHAR, my_rank + 1, 0, MPI_COMM_WORLD);
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+        if(my_rank == 0){
+            MPI_Bcast(&buf,buf.size(),MPI_CHAR,0,MPI_COMM_WORLD);
+        }else{
+            MPI_Probe(0,0,MPI_COMM_WORLD,&status);
+            MPI_Get_count(&status,MPI_CHAR,&messageSize);
+            MPI_Bcast(&buf,messageSize,MPI_CHAR,0,MPI_COMM_WORLD);
+        }
+        document.Parse(buf.c_str());
+        list_of_infected.clear();
+        for (rapidjson::Value :: ConstMemberIterator iterator = document.MemberBegin(); iterator != document.MemberEnd();++iterator) {
+            auto *temp_infected = new Infected();
+            temp_infected->Deserialize(iterator->value);
+            list_of_infected.push_back(*temp_infected);
+        }
+        for (const auto &individual : world.getIndividuals()) {
+            Point curr_position = individual.getPosition();
+            for (const auto &inf : list_of_infected) {
 
-
-        MPI_Bcast((void *) sb.GetString(), sb.GetSize(), MPI_CHAR, my_rank, MPI_COMM_WORLD);
-        MPI_Barrier(MPI_COMM_WORLD); //TODO: check correctness of this barrier
-        //TODO:this does not work, change it
-        for (int proc=0; proc < world_size;proc++){
-            if (proc != my_rank)
-                MPI_Send((void *) sb.GetString(), sb.GetSize(), MPI_CHAR, my_rank,0, MPI_COMM_WORLD);
-
+            }
         }
     }
 

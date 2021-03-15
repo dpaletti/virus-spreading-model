@@ -1,4 +1,6 @@
 #include "Point.h"
+#include "rapidjson/document.h"
+
 
 Point::Point(float x, float y) : x(x), y(y) {}
 
@@ -31,4 +33,9 @@ void Point::Serialize(Writer &writer) const {
     writer.Double((double)y);
     writer.EndObject();
 
+}
+
+void Point::Deserialize(const rapidjson::Value &obj) {
+    x = (float)obj.FindMember("x")->value.GetDouble();
+    y = (float)obj.FindMember("y")->value.GetDouble();
 }

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "rapidjson/prettywriter.h" // for stringify JSON
+#include "rapidjson/document.h"
 #include <exception>
 
 class Point {
@@ -22,6 +23,7 @@ public:
 
     template <typename Writer>
     void Serialize(Writer& writer) const;
+    void Deserialize(const rapidjson::Value &obj);
 
 private:
     float x, y;
