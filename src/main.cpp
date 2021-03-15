@@ -8,11 +8,12 @@
 #include "World.h"
 #include "rapidjson/prettywriter.h" // for stringify JSON
 #include "Infected.h"
+#include "helper.cpp"
 
 int main(int argc, char** argv) {
 
     // Initialize the MPI environment
-    MPI_Init(NULL, NULL);
+    MPI_Init(nullptr, nullptr);
 
     // Get the number of processes
     int world_size;
@@ -22,100 +23,69 @@ int main(int argc, char** argv) {
     int my_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
+    // Parse input json
     InputParser inputParser = InputParser("../config/input.json");
+
+    // Initialize World and place countries
     std::vector<Country> countries = Country::buildCountries(inputParser.getCountries());
     std::pair<float, float> worldSize = inputParser.getWorldSize();
     World world = World(worldSize.second, worldSize.first, countries, inputParser.getVelocity(), inputParser.getMaximumSpreadingDistance(), inputParser.getTimeStep());
-    world.printWorld(); //debug
+    world.printWorld(); // DEBUG
 
     MPI_Barrier(MPI_COMM_WORLD);
 
+    // Initialize number of infected
     int infected = std::floor(inputParser.getInfectedNumber() / world_size);
-    int individuals = std::floor(inputParser.getIndividualsNumber() / world_size);
-    int accumulator;
 
-    if (my_rank == 0){
-        MPI_Send(&individuals, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
-        MPI_Recv(&accumulator, 1, MPI_INT, world_size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        individuals += inputParser.getIndividualsNumber() - accumulator;
-    } else {
-        int destination = my_rank + 1;
-        MPI_Recv(&accumulator, 1, MPI_INT, my_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        accumulator += individuals;
-        if (my_rank == world_size)
-            destination = 0;
-        MPI_Send(&accumulator, 1, MPI_INT, destination, 0, MPI_COMM_WORLD);
-    }
+    // Initialize day length
+    int day_length = std::floor(86400 / inputParser.getTimeStep());
 
+    // Split individuals among processes
+    int individuals = split_individuals(my_rank, &inputParser, world_size);
     world.addIndividuals(individuals, infected, my_rank);
 
-    int day_length = std::floor(86400 / inputParser.getTimeStep());
     MPI_Barrier(MPI_COMM_WORLD);
-    std::vector<Infected> list_of_infected;
 
+    // Infected list
+    std::vector<Infected> infected_list;
+
+    // Serialization helper variables
+    rapidjson::StringBuffer serialized;
+    std::string current_serialized_infected;
+
+
+    // Day loop
     Individual current_individual;
-    rapidjson::StringBuffer sb;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-
     for(int step = 0; step < day_length; step++){
         world.updatePositions();
+
+        // Build infected list
         for (int i = 0; i < individuals; i++){
             current_individual = world.getIndividuals()[i];
             if (current_individual.isInfected1()){
-                list_of_infected.emplace_back(current_individual.getPosition(), current_individual.getId());
+                infected_list.emplace_back(current_individual.getPosition(), current_individual.getId());
             }
         }
-        writer.StartArray();
-        for (const auto &item : list_of_infected) {
-            item.Serialize(writer);
-        }
-        writer.EndArray();
-        std::string buf;
-        MPI_Status status;
-        int messageSize;
-        rapidjson::Document document;
-        if(my_rank == 0) {
-            MPI_Send((void *) sb.GetString(), sb.GetSize(), MPI_CHAR, my_rank + 1, 0, MPI_COMM_WORLD);
-            MPI_Probe(world_size-1,0,MPI_COMM_WORLD,&status);
-            MPI_Get_count(&status,MPI_CHAR,&messageSize);
-            MPI_Recv(&buf,messageSize,MPI_CHAR,world_size - 1,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-        }else{
-            MPI_Probe(my_rank-1,0,MPI_COMM_WORLD,&status);
-            MPI_Get_count(&status,MPI_CHAR,&messageSize);
-            MPI_Recv(&buf,messageSize,MPI_CHAR,my_rank - 1,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-            //TODO: Deserialize message and unite it with
-            document.Parse(buf.c_str());
-            for (rapidjson::Value :: ConstMemberIterator iterator = document.MemberBegin(); iterator != document.MemberEnd();++iterator) {
-                auto *temp_infected = new Infected();
-                temp_infected->Deserialize(iterator->value);
-                list_of_infected.push_back(*temp_infected);
-            }
-            writer.StartArray();
-            for (const auto &item : list_of_infected) {
-                item.Serialize(writer);
-            }
-            writer.EndArray();
-            MPI_Send((void *) sb.GetString(), sb.GetSize(), MPI_CHAR, my_rank + 1, 0, MPI_COMM_WORLD);
-        }
+
+        // Serialize infected list
+        serialized = serialize_list(infected_list);
+
+        // Gather current infected from all processes
+        current_serialized_infected = spread_infected(my_rank, world_size, serialized, infected_list);
+
         MPI_Barrier(MPI_COMM_WORLD);
-        if(my_rank == 0){
-            MPI_Bcast(&buf,buf.size(),MPI_CHAR,0,MPI_COMM_WORLD);
-        }else{
-            MPI_Probe(0,0,MPI_COMM_WORLD,&status);
-            MPI_Get_count(&status,MPI_CHAR,&messageSize);
-            MPI_Bcast(&buf,messageSize,MPI_CHAR,0,MPI_COMM_WORLD);
-        }
-        document.Parse(buf.c_str());
-        list_of_infected.clear();
-        for (rapidjson::Value :: ConstMemberIterator iterator = document.MemberBegin(); iterator != document.MemberEnd();++iterator) {
-            auto *temp_infected = new Infected();
-            temp_infected->Deserialize(iterator->value);
-            list_of_infected.push_back(*temp_infected);
-        }
+
+        // Send all infected to all processes
+        broadcast_global_infected(my_rank, current_serialized_infected);
+
+        // Deserialize received infected list
+        infected_list = deserialize_list(current_serialized_infected);
+
+        // Compute new infected and update infection timers
         for (const auto &individual : world.getIndividuals()) {
             Point curr_position = individual.getPosition();
-            for (const auto &inf : list_of_infected) {
-
+            for (const auto &inf : infected_list) {
+                // TODO compute new infections and update infection timers, update individuals state
             }
         }
     }
