@@ -77,8 +77,24 @@ float World::getMaximumSpreadingDistance() const {
     return maximumSpreadingDistance;
 }
 
-float World::getTimeStep() const {
+const float World::getTimeStep() {
     return timeStep;
+}
+
+float World::getVelocity() const {
+    return velocity;
+}
+
+const int World::getSusceptibleToInfected() {
+    return susceptible_to_infected;
+}
+
+const int World::getInfectedToImmune() {
+    return infected_to_immune;
+}
+
+const int World::getImmuneToSusceptible() {
+    return immune_to_susceptible;
 }
 
 

@@ -1,8 +1,6 @@
-//
-// Created by dpaletti on 2021-03-14.
-//
-
 #include "Individual.h"
+#include "Infected.h"
+#include "World.h"
 #include <random>
 #include <algorithm>
 
@@ -64,18 +62,47 @@ void Individual::addContact(const std::string& basicString, float timeStep) {
     recent_contacts.emplace_back(basicString, timeStep);
 }
 
-void Individual::removeContact(std::string basicString) {
-    auto lastNotRemovedElement = std :: remove_if(recent_contacts.begin(),recent_contacts.end(),
-                                                  [&](const std::pair<std::string, float>& cont) { return (cont.first == basicString);});
-
+void Individual::removeContact(std::string idToRemove) {
+    recent_contacts.erase(std::remove_if(recent_contacts.begin(),recent_contacts.end(),
+                                              [&](const Contact& cont) { return (cont.getId() == idToRemove);}), recent_contacts.end());
 }
 
-std::vector<Individual> Individual::getIntersection(std::vector<std::string> globalInfected) {
-    std :: vector<Individual> out;
-    std :: sort(recent_contacts.begin(),recent_contacts.end());
-    std :: sort(globalInfected.begin(),globalInfected.end());
-    std :: set_intersection(recent_contacts.begin(),recent_contacts.end(),globalInfected.begin(),globalInfected.end(),out);
-    return out;
+std::pair<std::vector<Infected>, std::vector<Infected>> Individual::getIntersectionAndDifference(std::vector<Infected> globalInfected) {
+    std::vector<Infected> intersection;
+    std::vector<Infected> difference;
+    std::sort(recent_contacts.begin(),recent_contacts.end());
+    std::sort(globalInfected.begin(), globalInfected.end());
+    std::set_intersection(recent_contacts.begin(),recent_contacts.end(), globalInfected.begin(), globalInfected.end(), intersection);
+    std::set_difference(globalInfected.begin(), globalInfected.end(), recent_contacts.begin(), recent_contacts.end(), difference);
+
+    return {intersection, difference};
 }
 
+const std::vector<Contact> &Individual::getRecentContacts() const {
+    return recent_contacts;
+}
 
+void Individual::update(bool transmission) {
+    timer += World::getTimeStep();
+    if (isInfected && timer >= (float)World::getInfectedToImmune()){ //no longer infected, becomes immune
+        isImmune = true;
+        isInfected = false;
+        timer = 0;
+        return;
+    }
+
+    if (isImmune && timer >= (float)World::getImmuneToSusceptible()){ //no longer immune
+        isImmune = false;
+        if (transmission) //becomes infected
+            isInfected = true;
+        timer = 0;
+        return;
+    }
+
+    if (!isImmune && !isInfected){ //susceptible
+        if (transmission){ //becomes infected
+            isInfected = true;
+            timer = 0;
+        }
+    }
+}

@@ -1,7 +1,3 @@
-//
-// Created by massimiliano on 16/03/21.
-//
-
 #include "Contact.h"
 
 #include <utility>

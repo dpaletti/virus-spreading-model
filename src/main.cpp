@@ -9,6 +9,7 @@
 #include "rapidjson/prettywriter.h" // for stringify JSON
 #include "Infected.h"
 #include "helper.cpp"
+#include <algorithm>
 
 int main(int argc, char** argv) {
 
@@ -81,33 +82,38 @@ int main(int argc, char** argv) {
         // Deserialize received infected list
         infected_list = deserialize_list(current_serialized_infected);
 
-        // Compute new infected and update infection timers
-        //For each individual of the world, i check the distance with the received infected individuals
-        //If the distance is less than  the maximum spreading distance, then i check in the recent contacts of the individual
-        //If it is in the recent contacts i update the time, otherwise i add it; i also add the individual to a temporary list
-        //of the contacts happened during the last timestep, at the end of the loop, all recent contacts that are not also in the
-        //temporary list will be removed
         float distance;
-        std :: vector<std :: string> contactsInThisTimeStep;
+        std::vector<Infected> current_intersection;
+        std::vector<Infected> current_difference;
+        std::pair<std::vector<Infected>, std::vector<Infected>> intersection_and_difference;
+        bool transmission = false;
+
         for (Individual individual : world.getIndividuals()) {
             Point curr_position = individual.getPosition();
-            /*for (const auto &inf : infected_list) {
-                // TODO compute new infections and update infection timers, update individuals state
-                //Computing distance
-                distance = curr_position.getDistance(inf.getPosition());
-                if(distance <= world.getMaximumSpreadingDistance()){
-                    auto contact = individual.findContactById(inf.getId());
-                    if(contact != nullptr)
-                        contact->second = contact->second + world.getTimeStep();
-                    else
-                        individual.addContact(inf.getId(),world.getTimeStep());
-                    contactsInThisTimeStep.emplace_back(inf.getId());
+            intersection_and_difference = individual.getIntersectionAndDifference(infected_list);
+            current_intersection = intersection_and_difference.first;
+            current_difference = intersection_and_difference.second;
+            
+            for (Contact contact : individual.getRecentContacts()) {
+                auto curr_infected = std::find(current_intersection.begin(), current_intersection.end(), contact);
+                if (curr_infected != current_intersection.end()){
+                    distance = curr_position.getDistance(curr_infected.base()->getPosition());
+                    if (distance <= world.getMaximumSpreadingDistance()){
+                        contact.setContactTime(contact.getContactTime() + world.getTimeStep());
+                        if (contact.getContactTime() >= world.getSusceptibleToInfected())
+                            transmission = true;
+                    } else {
+                        individual.removeContact(contact.getId());
+                    }
                 }
-            }*/
-            individual.getIntersection()
-            //All the infected in the infected list are checked with the individual, now the contacts that do not belong in
-            //the vector of contacts are removed from the contact list
+            }
 
+            for (const auto &inf : current_difference) {
+                distance = curr_position.getDistance(inf.getPosition());
+                if (distance <= world.getMaximumSpreadingDistance())
+                    individual.addContact(inf.getId(), world.getTimeStep());
+            }
+            individual.update(transmission);
         }
     }
 

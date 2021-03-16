@@ -30,18 +30,28 @@ public:
 
     float getMaximumSpreadingDistance() const;
 
-    float getTimeStep() const;
+    static const float getTimeStep();
 
 private:
     float velocity;
     float maximumSpreadingDistance;
-    float timeStep;
+    static float timeStep;
     float length, width;
 
+public:
+    float getVelocity() const;
+
+    static const int getSusceptibleToInfected();
+
+    static const int getInfectedToImmune();
+
+    static const int getImmuneToSusceptible();
+
+private:
     //seconds
-    const int susceptible_to_infected = 600; //10 minutes
-    const int infected_to_immune = 864000; //10 days
-    const int immune_to_susceptible = 7776000; //3 months
+    static const int susceptible_to_infected = 600;//10 minutes
+    static const int infected_to_immune = 864000; //10 days
+    static const int immune_to_susceptible = 7776000; //3 months
 
     std::vector<Individual> individuals;
     std::vector<Country> countries;

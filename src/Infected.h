@@ -5,6 +5,8 @@
 
 #include "Point.h"
 #include "rapidjson/document.h"
+//#include "Contact.h"
+class Contact;
 
 class Infected {
 private:
@@ -22,7 +24,12 @@ public:
     const std::string &getId() const;
 
     const Point &getPosition() const;
-
+    bool operator<(const Infected& i){
+        return id < i.getId();
+    }
+    bool operator<(const Contact& c){
+        return id < c.getId();
+    }
 };
 
 

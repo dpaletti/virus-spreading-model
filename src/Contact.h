@@ -1,12 +1,9 @@
-//
-// Created by massimiliano on 16/03/21.
-//
-
 #ifndef VIRUS_SPREADING_MODEL_CONTACT_H
 #define VIRUS_SPREADING_MODEL_CONTACT_H
 
 
 #include <string>
+#include "Infected.h"
 
 class Contact {
 public:
@@ -23,9 +20,13 @@ public:
     bool operator<(const Contact& c){
         return id < c.getId();
     }
+
+    bool operator==(Infected& i){
+        return i.getId() == id;
+    }
 private:
-    std :: string id;
-    float contactTime{};
+    std::string id;
+    float contactTime;
 };
 
 
