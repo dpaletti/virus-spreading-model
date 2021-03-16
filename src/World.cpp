@@ -73,5 +73,13 @@ const std::vector<Individual> &World::getIndividuals() const {
     return individuals;
 }
 
+float World::getMaximumSpreadingDistance() const {
+    return maximumSpreadingDistance;
+}
+
+float World::getTimeStep() const {
+    return timeStep;
+}
+
 
 

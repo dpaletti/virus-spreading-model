@@ -82,11 +82,32 @@ int main(int argc, char** argv) {
         infected_list = deserialize_list(current_serialized_infected);
 
         // Compute new infected and update infection timers
-        for (const auto &individual : world.getIndividuals()) {
+        //For each individual of the world, i check the distance with the received infected individuals
+        //If the distance is less than  the maximum spreading distance, then i check in the recent contacts of the individual
+        //If it is in the recent contacts i update the time, otherwise i add it; i also add the individual to a temporary list
+        //of the contacts happened during the last timestep, at the end of the loop, all recent contacts that are not also in the
+        //temporary list will be removed
+        float distance;
+        std :: vector<std :: string> contactsInThisTimeStep;
+        for (Individual individual : world.getIndividuals()) {
             Point curr_position = individual.getPosition();
-            for (const auto &inf : infected_list) {
+            /*for (const auto &inf : infected_list) {
                 // TODO compute new infections and update infection timers, update individuals state
-            }
+                //Computing distance
+                distance = curr_position.getDistance(inf.getPosition());
+                if(distance <= world.getMaximumSpreadingDistance()){
+                    auto contact = individual.findContactById(inf.getId());
+                    if(contact != nullptr)
+                        contact->second = contact->second + world.getTimeStep();
+                    else
+                        individual.addContact(inf.getId(),world.getTimeStep());
+                    contactsInThisTimeStep.emplace_back(inf.getId());
+                }
+            }*/
+            individual.getIntersection()
+            //All the infected in the infected list are checked with the individual, now the contacts that do not belong in
+            //the vector of contacts are removed from the contact list
+
         }
     }
 

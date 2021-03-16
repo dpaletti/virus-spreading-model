@@ -21,3 +21,11 @@ void Infected::Deserialize(const rapidjson::Value &obj) {
     position = Point();
     position.Deserialize(obj);
 }
+
+const std::string &Infected::getId() const {
+    return id;
+}
+
+const Point &Infected::getPosition() const {
+    return position;
+}

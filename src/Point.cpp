@@ -1,6 +1,6 @@
 #include "Point.h"
 #include "rapidjson/document.h"
-
+#include <math.h>
 
 Point::Point(float x, float y) : x(x), y(y) {}
 
@@ -38,4 +38,9 @@ void Point::Serialize(Writer &writer) const {
 void Point::Deserialize(const rapidjson::Value &obj) {
     x = (float)obj.FindMember("x")->value.GetDouble();
     y = (float)obj.FindMember("y")->value.GetDouble();
+}
+
+float Point::getDistance(Point a) {
+    //TODO:Check if return double
+    return sqrt(pow(getX(),2) - pow(a.getX(),2) + pow(getY(),2) - pow(a.getY(),2));
 }

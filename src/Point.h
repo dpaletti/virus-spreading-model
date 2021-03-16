@@ -19,6 +19,8 @@ public:
 
     bool equals(Point a) const;
 
+    float getDistance(Point a);
+
     std::string toString();
 
     template <typename Writer>

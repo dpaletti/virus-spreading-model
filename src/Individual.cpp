@@ -3,11 +3,8 @@
 //
 
 #include "Individual.h"
-#include <time.h>
-#include <cmath>
-#include <cstdlib>
 #include <random>
-#include <cmath>
+#include <algorithm>
 
 Individual::Individual(bool isInfected, float bound_x, float bound_y, std::string id) : isInfected(isInfected), isImmune(false){
     randomize_position(bound_x, bound_y);
@@ -44,12 +41,41 @@ void Individual::relocate(float bound_x, float bound_y) {
     randomize_position(bound_x, bound_y);
 }
 
-void Individual::setPosition(const Point &position) {
-    Individual::position = position;
+void Individual::setPosition(const Point &point) {
+    Individual::position = point;
 }
 
-Individual::Individual() {}
+Individual::Individual() = default;
 
 const std::string &Individual::getId() const {
     return id;
 }
+
+Contact* Individual::findContactById(std :: string basicString) {
+    auto iterator = std :: find_if(recent_contacts.begin(),recent_contacts.end(),
+                                   [&](const std::pair<std::string, float>& cont) { return (cont.first == basicString);});
+    if(iterator != recent_contacts.end())
+        return iterator.base();
+    else
+        return nullptr;
+}
+
+void Individual::addContact(const std::string& basicString, float timeStep) {
+    recent_contacts.emplace_back(basicString, timeStep);
+}
+
+void Individual::removeContact(std::string basicString) {
+    auto lastNotRemovedElement = std :: remove_if(recent_contacts.begin(),recent_contacts.end(),
+                                                  [&](const std::pair<std::string, float>& cont) { return (cont.first == basicString);});
+
+}
+
+std::vector<Individual> Individual::getIntersection(std::vector<std::string> globalInfected) {
+    std :: vector<Individual> out;
+    std :: sort(recent_contacts.begin(),recent_contacts.end());
+    std :: sort(globalInfected.begin(),globalInfected.end());
+    std :: set_intersection(recent_contacts.begin(),recent_contacts.end(),globalInfected.begin(),globalInfected.end(),out);
+    return out;
+}
+
+

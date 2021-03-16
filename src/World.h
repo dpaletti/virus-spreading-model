@@ -28,6 +28,10 @@ public:
 
     void updatePositions();
 
+    float getMaximumSpreadingDistance() const;
+
+    float getTimeStep() const;
+
 private:
     float velocity;
     float maximumSpreadingDistance;

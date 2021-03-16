@@ -19,6 +19,10 @@ public:
     void Serialize(Writer& writer) const;
     void Deserialize(const rapidjson::Value &obj);
 
+    const std::string &getId() const;
+
+    const Point &getPosition() const;
+
 };
 
 
