@@ -82,39 +82,7 @@ int main(int argc, char** argv) {
         // Deserialize received infected list
         infected_list = deserialize_list(current_serialized_infected);
 
-        float distance;
-        std::vector<Infected> current_intersection;
-        std::vector<Infected> current_difference;
-        std::pair<std::vector<Infected>, std::vector<Infected>> intersection_and_difference;
-        bool transmission = false;
-
-        for (Individual individual : world.getIndividuals()) {
-            Point curr_position = individual.getPosition();
-            intersection_and_difference = individual.getIntersectionAndDifference(infected_list);
-            current_intersection = intersection_and_difference.first;
-            current_difference = intersection_and_difference.second;
-            
-            for (Contact contact : individual.getRecentContacts()) {
-                auto curr_infected = std::find(current_intersection.begin(), current_intersection.end(), contact);
-                if (curr_infected != current_intersection.end()){
-                    distance = curr_position.getDistance(curr_infected.base()->getPosition());
-                    if (distance <= world.getMaximumSpreadingDistance()){
-                        contact.setContactTime(contact.getContactTime() + world.getTimeStep());
-                        if (contact.getContactTime() >= world.getSusceptibleToInfected())
-                            transmission = true;
-                    } else {
-                        individual.removeContact(contact.getId());
-                    }
-                }
-            }
-
-            for (const auto &inf : current_difference) {
-                distance = curr_position.getDistance(inf.getPosition());
-                if (distance <= world.getMaximumSpreadingDistance())
-                    individual.addContact(inf.getId(), world.getTimeStep());
-            }
-            individual.update(transmission, world.getTimeStep());
-        }
+        spread_virus(world, infected_list);
     }
 
     MPI_Finalize();
