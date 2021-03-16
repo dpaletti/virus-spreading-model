@@ -30,12 +30,12 @@ public:
 
     float getMaximumSpreadingDistance() const;
 
-    static const float getTimeStep();
+    const float getTimeStep();
 
 private:
     float velocity;
     float maximumSpreadingDistance;
-    static float timeStep;
+    float timeStep;
     float length, width;
 
 public:

@@ -4,7 +4,7 @@
 
 #include <string>
 #include "Infected.h"
-
+class Infected;
 class Contact {
 public:
     Contact();
@@ -21,9 +21,7 @@ public:
         return id < c.getId();
     }
 
-    bool operator==(Infected& i){
-        return i.getId() == id;
-    }
+    bool operator==(const Infected& i);
 private:
     std::string id;
     float contactTime;

@@ -55,7 +55,7 @@ public:
         return id < c.getId();
     }
     const std::vector<Contact> &getRecentContacts() const;
-    void update(bool transmission);
+    void update(bool transmission, float timeStep);
 };
 
 

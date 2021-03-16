@@ -5,9 +5,8 @@
 
 #include "Point.h"
 #include "rapidjson/document.h"
-//#include "Contact.h"
+#include "Contact.h"
 class Contact;
-
 class Infected {
 private:
     Point position;
@@ -27,11 +26,7 @@ public:
     bool operator<(const Infected& i){
         return id < i.getId();
     }
-    bool operator<(const Contact& c){
-        return id < c.getId();
-    }
+    bool operator<(const Contact& c);
 };
-
-
 
 #endif //VIRUS_SPREADING_MODEL_INFECTED_H

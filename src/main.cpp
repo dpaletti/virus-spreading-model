@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
                 if (distance <= world.getMaximumSpreadingDistance())
                     individual.addContact(inf.getId(), world.getTimeStep());
             }
-            individual.update(transmission);
+            individual.update(transmission, world.getTimeStep());
         }
     }
 

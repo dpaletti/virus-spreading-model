@@ -82,8 +82,8 @@ const std::vector<Contact> &Individual::getRecentContacts() const {
     return recent_contacts;
 }
 
-void Individual::update(bool transmission) {
-    timer += World::getTimeStep();
+void Individual::update(bool transmission, float timeStep) {
+    timer += timeStep;
     if (isInfected && timer >= (float)World::getInfectedToImmune()){ //no longer infected, becomes immune
         isImmune = true;
         isInfected = false;

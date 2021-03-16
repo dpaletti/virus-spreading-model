@@ -1,4 +1,5 @@
 #include "Infected.h"
+#include "Contact.h"
 #include "rapidjson/document.h"
 
 
@@ -28,4 +29,8 @@ const std::string &Infected::getId() const {
 
 const Point &Infected::getPosition() const {
     return position;
+}
+
+bool Infected::operator<(const Contact& c){
+    return id < c.getId();
 }

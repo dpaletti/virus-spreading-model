@@ -1,5 +1,5 @@
 #include "Contact.h"
-
+#include "Infected.h"
 #include <utility>
 
 Contact::Contact() = default;
@@ -16,4 +16,8 @@ void Contact::setContactTime(float d) {
 
 const std::string &Contact::getId() const {
     return id;
+}
+
+bool Contact::operator==(const Infected& i){
+    return i.getId() == id;
 }
