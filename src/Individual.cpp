@@ -49,14 +49,14 @@ const std::string &Individual::getId() const {
     return id;
 }
 
-Contact* Individual::findContactById(std :: string basicString) {
+/**Contact* Individual::findContactById(std :: string basicString) {
     auto iterator = std :: find_if(recent_contacts.begin(),recent_contacts.end(),
                                    [&](const std::pair<std::string, float>& cont) { return (cont.first == basicString);});
     if(iterator != recent_contacts.end())
         return iterator.base();
     else
         return nullptr;
-}
+}**/
 
 void Individual::addContact(const std::string& basicString, float timeStep) {
     recent_contacts.emplace_back(basicString, timeStep);
@@ -67,13 +67,25 @@ void Individual::removeContact(std::string idToRemove) {
                                               [&](const Contact& cont) { return (cont.getId() == idToRemove);}), recent_contacts.end());
 }
 
+struct InfectedContactComparator
+{
+    bool operator()(const Infected& p_left, const Contact& p_right)
+    {
+        return p_left.getId() < p_right.getId();
+    }
+    bool operator()(const Contact& p_left, const Infected& p_right)
+    {
+        return p_left.getId() < p_right.getId();
+    }
+};
+
 std::pair<std::vector<Infected>, std::vector<Infected>> Individual::getIntersectionAndDifference(std::vector<Infected> globalInfected) {
     std::vector<Infected> intersection;
     std::vector<Infected> difference;
     std::sort(recent_contacts.begin(),recent_contacts.end());
     std::sort(globalInfected.begin(), globalInfected.end());
-    std::set_intersection(recent_contacts.begin(),recent_contacts.end(), globalInfected.begin(), globalInfected.end(), intersection);
-    std::set_difference(globalInfected.begin(), globalInfected.end(), recent_contacts.begin(), recent_contacts.end(), difference);
+    std::set_intersection(globalInfected.begin(), globalInfected.end(), recent_contacts.begin(), recent_contacts.end(), inserter(intersection, intersection.begin()), InfectedContactComparator{});
+    std::set_difference(globalInfected.begin(), globalInfected.end(), recent_contacts.begin(), recent_contacts.end(), inserter(difference, difference.begin()), InfectedContactComparator{});
 
     return {intersection, difference};
 }

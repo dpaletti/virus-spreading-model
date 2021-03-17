@@ -14,10 +14,9 @@ private:
 public:
     Infected();
 
-    Infected(const Point &position, const std::string &id);
+    Infected(const Point &position, std::string id);
 
-    template <typename Writer>
-    void Serialize(Writer& writer) const;
+    void Serialize(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer) const;
     void Deserialize(const rapidjson::Value &obj);
 
     const std::string &getId() const;
@@ -27,6 +26,15 @@ public:
         return id < i.getId();
     }
     bool operator<(const Contact& c);
+    bool operator==(const Infected &i) {
+        return id == i.getId();
+    }
+    Infected operator*(){
+        return *this;
+
+    }
+
+    bool operator==(const Contact &c);
 };
 
 #endif //VIRUS_SPREADING_MODEL_INFECTED_H

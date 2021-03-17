@@ -24,12 +24,11 @@ std::string Point::toString() {
     return point;
 }
 
-template<typename Writer>
-void Point::Serialize(Writer &writer) const {
+void Point::Serialize(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer) const {
     writer.StartObject();
-    writer.String("x");
+    writer.Key("x");
     writer.Double((double)x);
-    writer.String("y");
+    writer.Key("y");
     writer.Double((double)y);
     writer.EndObject();
 

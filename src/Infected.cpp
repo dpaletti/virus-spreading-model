@@ -1,26 +1,28 @@
 #include "Infected.h"
+
+#include <utility>
 #include "Contact.h"
 #include "rapidjson/document.h"
 
 
-template<typename Writer>
-void Infected::Serialize(Writer &writer) const {
+void Infected::Serialize(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer) const {
     writer.StartObject();
-    position.template Serialize(writer);
-    writer.String("id");
-    writer.String(id);
+    writer.Key("point");
+    position.Serialize(writer);
+    writer.Key("id");
+    writer.String(id.c_str());
     writer.EndObject();
 
 }
 
-Infected::Infected() {}
+Infected::Infected() = default;
 
-Infected::Infected(const Point &position, const std::string &id) : position(position), id(id) {}
+Infected::Infected(const Point &position, std::string id) : position(position), id(std::move(id)) {}
 
 void Infected::Deserialize(const rapidjson::Value &obj) {
     id = obj.FindMember("id")->value.GetString();
     position = Point();
-    position.Deserialize(obj);
+    position.Deserialize(obj.FindMember("point")->value);
 }
 
 const std::string &Infected::getId() const {
@@ -33,4 +35,7 @@ const Point &Infected::getPosition() const {
 
 bool Infected::operator<(const Contact& c){
     return id < c.getId();
+}
+bool Infected::operator==(const Contact &c){
+    return id == c.getId();
 }

@@ -23,8 +23,7 @@ public:
 
     std::string toString();
 
-    template <typename Writer>
-    void Serialize(Writer& writer) const;
+    void Serialize(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer) const;
     void Deserialize(const rapidjson::Value &obj);
 
 private:

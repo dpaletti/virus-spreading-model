@@ -8,7 +8,7 @@
 #include "World.h"
 #include "rapidjson/prettywriter.h" // for stringify JSON
 #include "Infected.h"
-#include "helper.cpp"
+#include "helper.h"
 #include <algorithm>
 
 int main(int argc, char** argv) {
@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     std::vector<Country> countries = Country::buildCountries(inputParser.getCountries());
     std::pair<float, float> worldSize = inputParser.getWorldSize();
     World world = World(worldSize.second, worldSize.first, countries, inputParser.getVelocity(), inputParser.getMaximumSpreadingDistance(), inputParser.getTimeStep());
-    world.printWorld(); // DEBUG
+    world.printWorld();
 
     MPI_Barrier(MPI_COMM_WORLD);
 
