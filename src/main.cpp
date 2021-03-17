@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
         MPI_Barrier(MPI_COMM_WORLD);
 
         // Send all infected to all processes
-        broadcast_global_infected(my_rank, current_serialized_infected);
+        broadcast_global_infected(my_rank, &current_serialized_infected);
 
         // Deserialize received infected list
         infected_list = deserialize_list(current_serialized_infected);

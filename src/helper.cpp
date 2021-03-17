@@ -52,10 +52,10 @@ std::string spread_infected(int my_rank, int world_size, rapidjson::StringBuffer
     std::string();
     MPI_Status status;
     int* messageSize = (int*)malloc(sizeof(int));
+    int destination = my_rank+1;
     rapidjson::Document document;
     if (my_rank == 0) {
-        printf("\n\n\n Serialized\n\n\n%s\n\n\n", serialized.GetString());
-        MPI_Send(serialized.GetString(), strlen(serialized.GetString()), MPI_CHAR, my_rank + 1, 0, MPI_COMM_WORLD);
+        MPI_Send(serialized.GetString(), strlen(serialized.GetString()), MPI_CHAR, destination, 0, MPI_COMM_WORLD);
         MPI_Probe(world_size - 1, 0, MPI_COMM_WORLD, &status);
         MPI_Get_count(&status, MPI_CHAR, messageSize);
         buf = (char*)malloc(sizeof(char)* (*messageSize));
@@ -65,43 +65,44 @@ std::string spread_infected(int my_rank, int world_size, rapidjson::StringBuffer
         MPI_Get_count(&status, MPI_CHAR, messageSize);
         buf = (char*)malloc(sizeof(char)*(*messageSize));
         MPI_Recv(buf, *messageSize, MPI_CHAR, my_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        printf("\n\n\n\n%s\n\n\n\n", buf);
         document.Parse<rapidjson::kParseStopWhenDoneFlag>(buf);
-        printf("\n\n\n\n Receiving \n\n %s\n\n\n\n\n", document.GetString());
-        for (rapidjson::Value::ConstMemberIterator iterator = document.MemberBegin();
-             iterator != document.MemberEnd(); ++iterator) {
+        for(auto& e : document.FindMember("infected")->value.GetArray()){
             auto *temp_infected = new Infected();
-            temp_infected->Deserialize(iterator->value.FindMember("infected")->value);
+            temp_infected->Deserialize(e.GetObject());
             infected_list.push_back(*temp_infected);
         }
         serialized = serialize_list(infected_list);
-        MPI_Send((void *) serialized.GetString(), serialized.GetSize(), MPI_CHAR, my_rank + 1, 0, MPI_COMM_WORLD);
+        if (my_rank == world_size-1)
+           destination = 0;
+        MPI_Send((void *) serialized.GetString(), serialized.GetSize(), MPI_CHAR, destination, 0, MPI_COMM_WORLD);
     }
     free(messageSize);
     free(buf);
     return buf;
 }
 
-void broadcast_global_infected(int my_rank, std::string current_serialized_infected){
+void broadcast_global_infected(int my_rank, std::string* current_serialized_infected){
     MPI_Status status;
     int messageSize;
     if(my_rank == 0){
-        MPI_Bcast(&current_serialized_infected,current_serialized_infected.size(),MPI_CHAR,0,MPI_COMM_WORLD);
+        MPI_Bcast((void *) (current_serialized_infected->c_str()), strlen(current_serialized_infected->c_str()), MPI_CHAR, 0, MPI_COMM_WORLD);
     }else{
         MPI_Probe(0,0,MPI_COMM_WORLD,&status);
         MPI_Get_count(&status,MPI_CHAR,&messageSize);
-        MPI_Bcast(&current_serialized_infected,messageSize,MPI_CHAR,0,MPI_COMM_WORLD);
+        MPI_Bcast(current_serialized_infected,messageSize,MPI_CHAR,0,MPI_COMM_WORLD);
     }
 }
 
-std::vector<Infected> deserialize_list(const std::string& current_serialized_infected){
+std::vector<Infected> deserialize_list(std::string current_serialized_infected){
+    //TODO not working current_serialized_infected prints out weird things
     std::vector<Infected> infected_list;
     rapidjson::Document document;
 
     document.Parse(current_serialized_infected.c_str());
-    for (rapidjson::Value :: ConstMemberIterator iterator = document.MemberBegin(); iterator != document.MemberEnd();++iterator) {
+    printf("\n\n\n\n%s\n\n\n", current_serialized_infected.c_str());
+    for(auto& e : document.FindMember("infected")->value.GetArray()){
         auto *temp_infected = new Infected();
-        temp_infected->Deserialize(iterator->value);
+        temp_infected->Deserialize(e.GetObject());
         infected_list.push_back(*temp_infected);
     }
     return infected_list;
