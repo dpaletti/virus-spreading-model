@@ -9,8 +9,8 @@
 class Contact;
 class Infected {
 private:
-    Point position;
-    std::string id;
+    Point position = Point();
+    std::string id = "";
 public:
     Infected();
 

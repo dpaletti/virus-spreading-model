@@ -1,7 +1,6 @@
 #include<iostream>
 #include <mpi.h>
 #include <vector>
-#include <chrono>
 #include <cmath>
 #include "InputParser.h"
 #include "Country.h"
@@ -9,7 +8,7 @@
 #include "rapidjson/prettywriter.h" // for stringify JSON
 #include "Infected.h"
 #include "helper.h"
-#include <algorithm>
+#include "MpiHandler.h"
 
 int main(int argc, char** argv) {
 
@@ -31,6 +30,7 @@ int main(int argc, char** argv) {
     std::vector<Country> countries = Country::buildCountries(inputParser.getCountries());
     std::pair<float, float> worldSize = inputParser.getWorldSize();
     World world = World(worldSize.second, worldSize.first, countries, inputParser.getVelocity(), inputParser.getMaximumSpreadingDistance(), inputParser.getTimeStep());
+    MpiHandler mpiHandler = MpiHandler(my_rank, world_size);
     world.printWorld();
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
     int day_length = std::floor(86400 / inputParser.getTimeStep());
 
     // Split individuals among processes
-    int individuals = split_individuals(my_rank, &inputParser, world_size);
+    int individuals = mpiHandler.split_individuals(&inputParser);
     world.addIndividuals(individuals, infected, my_rank);
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -52,12 +52,11 @@ int main(int argc, char** argv) {
 
     // Serialization helper variables
     rapidjson::StringBuffer serialized;
-    std::string current_serialized_infected;
 
 
     // Day loop
     Individual current_individual;
-    for(int step = 0; step < day_length; step++){
+    for(int step = 0; step < day_length; step+=step){
         world.updatePositions();
 
         // Build infected list
@@ -72,15 +71,16 @@ int main(int argc, char** argv) {
         serialized = serialize_list(infected_list);
 
         // Gather current infected from all processes
-        current_serialized_infected = spread_infected(my_rank, world_size, serialized, infected_list);
+        mpiHandler.spread_infected(serialized, infected_list);
 
         MPI_Barrier(MPI_COMM_WORLD);
 
         // Send all infected to all processes
-        broadcast_global_infected(my_rank, &current_serialized_infected);
+        mpiHandler.broadcast_global_infected();
+        printf("\n\nMAIN -> RANK: %d, STEP %d\n\n", my_rank, step);
 
         // Deserialize received infected list
-        infected_list = deserialize_list(current_serialized_infected);
+        infected_list = deserialize_list(mpiHandler.getCurrentSerializedInfected());
 
         spread_virus(world, infected_list);
     }

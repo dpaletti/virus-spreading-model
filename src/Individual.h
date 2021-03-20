@@ -23,7 +23,7 @@ private:
     std::string id;
     std::vector<Contact> recent_contacts;
     Point position;
-    float timer;
+    float timer = 0;
 
 public:
     void setPosition(const Point &point);

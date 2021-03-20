@@ -12,26 +12,6 @@
 // TODO: move all methods except serialize and deserialize to a coordination (think of a better name) class
 // TODO: move serialize and deserialize to a helper file (no state)
 
-int split_individuals(int my_rank, InputParser *inputParser, int world_size) {
-
-    int* accumulator = (int*)malloc(sizeof(int));
-    int individuals = std::floor(inputParser->getIndividualsNumber() / world_size);
-    if (my_rank == 0) {
-        MPI_Send(&individuals, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
-        MPI_Recv(accumulator, 1, MPI_INT, world_size-1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        individuals += inputParser->getIndividualsNumber() - *accumulator;
-    } else {
-        int destination = my_rank + 1;
-        MPI_Recv(accumulator, 1, MPI_INT, my_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        *accumulator += individuals;
-        if (my_rank == world_size-1)
-            destination = 0;
-        MPI_Send(accumulator, 1, MPI_INT, destination, 0, MPI_COMM_WORLD);
-    }
-    free(accumulator);
-    return individuals;
-
-}
 
 rapidjson::StringBuffer serialize_list(const std::vector<Infected>& infected_list){
     rapidjson::StringBuffer sb;
@@ -47,61 +27,21 @@ rapidjson::StringBuffer serialize_list(const std::vector<Infected>& infected_lis
    return sb;
 
 }
-std::string spread_infected(int my_rank, int world_size, rapidjson::StringBuffer& serialized, std::vector<Infected> infected_list) {
-    char* buf;
-    std::string();
-    MPI_Status status;
-    int* messageSize = (int*)malloc(sizeof(int));
-    int destination = my_rank+1;
-    rapidjson::Document document;
-    if (my_rank == 0) {
-        MPI_Send(serialized.GetString(), strlen(serialized.GetString()), MPI_CHAR, destination, 0, MPI_COMM_WORLD);
-        MPI_Probe(world_size - 1, 0, MPI_COMM_WORLD, &status);
-        MPI_Get_count(&status, MPI_CHAR, messageSize);
-        buf = (char*)malloc(sizeof(char)* (*messageSize));
-        MPI_Recv(buf, *messageSize, MPI_CHAR, world_size - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    } else {
-        MPI_Probe(my_rank - 1, 0, MPI_COMM_WORLD, &status);
-        MPI_Get_count(&status, MPI_CHAR, messageSize);
-        buf = (char*)malloc(sizeof(char)*(*messageSize));
-        MPI_Recv(buf, *messageSize, MPI_CHAR, my_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        document.Parse<rapidjson::kParseStopWhenDoneFlag>(buf);
-        for(auto& e : document.FindMember("infected")->value.GetArray()){
-            auto *temp_infected = new Infected();
-            temp_infected->Deserialize(e.GetObject());
-            infected_list.push_back(*temp_infected);
-        }
-        serialized = serialize_list(infected_list);
-        if (my_rank == world_size-1)
-           destination = 0;
-        MPI_Send((void *) serialized.GetString(), serialized.GetSize(), MPI_CHAR, destination, 0, MPI_COMM_WORLD);
-    }
-    free(messageSize);
-    free(buf);
-    return buf;
-}
 
-void broadcast_global_infected(int my_rank, std::string* current_serialized_infected){
-    MPI_Status status;
-    int messageSize;
-    if(my_rank == 0){
-        MPI_Bcast((void *) (current_serialized_infected->c_str()), strlen(current_serialized_infected->c_str()), MPI_CHAR, 0, MPI_COMM_WORLD);
-    }else{
-        MPI_Probe(0,0,MPI_COMM_WORLD,&status);
-        MPI_Get_count(&status,MPI_CHAR,&messageSize);
-        MPI_Bcast(current_serialized_infected,messageSize,MPI_CHAR,0,MPI_COMM_WORLD);
-    }
-}
-
-std::vector<Infected> deserialize_list(std::string current_serialized_infected){
+std::vector<Infected> deserialize_list(const char* current_serialized_infected){
     //TODO not working current_serialized_infected prints out weird things
     std::vector<Infected> infected_list;
     rapidjson::Document document;
+    Infected *temp_infected;
 
-    document.Parse(current_serialized_infected.c_str());
-    printf("\n\n\n\n%s\n\n\n", current_serialized_infected.c_str());
+    document.Parse<rapidjson::kParseStopWhenDoneFlag>(current_serialized_infected);
     for(auto& e : document.FindMember("infected")->value.GetArray()){
-        auto *temp_infected = new Infected();
+        try {
+            temp_infected = new Infected();
+        }catch(std::bad_alloc&){
+            printf("Bad Alloc at deserialize list");
+            abort();
+        }
         temp_infected->Deserialize(e.GetObject());
         infected_list.push_back(*temp_infected);
     }
@@ -144,24 +84,22 @@ bool update_contacts_difference(bool transmission, Individual *individual, std::
     return transmission;
 }
 //updates the contact time and inserts new contacts in the recent contacts for each individual
-void spread_virus (World world, std::vector<Infected> infected_list){
+void spread_virus (World world, const std::vector<Infected>& infected_list){
     std::vector<Infected> current_intersection;
     std::vector<Infected> current_difference;
     std::pair<std::vector<Infected>, std::vector<Infected>> intersection_and_difference;
-    Point curr_position;
     bool transmission = false;
 
     for (Individual individual : world.getIndividuals()) {
-        curr_position = individual.getPosition();
         intersection_and_difference = individual.getIntersectionAndDifference(infected_list);
         current_intersection = intersection_and_difference.first;
         current_difference = intersection_and_difference.second;
 
         transmission = update_contacts_intersection(&individual, current_intersection, world);
         transmission = update_contacts_difference(transmission, &individual, current_difference, world);
-        //moving
 
         individual.update(transmission, world.getTimeStep());
+        printf("\n\nID: %s\n\n", individual.getId().c_str());
     }
 }
 

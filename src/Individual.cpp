@@ -3,10 +3,10 @@
 #include "World.h"
 #include <random>
 #include <algorithm>
+#include <utility>
 
-Individual::Individual(bool isInfected, float bound_x, float bound_y, std::string id) : isInfected(isInfected), isImmune(false){
+Individual::Individual(bool isInfected, float bound_x, float bound_y, std::string id) : isInfected(isInfected), isImmune(false), id(std::move(id)){
     randomize_position(bound_x, bound_y);
-    id = id;
 }
 
 const Point &Individual::getDirection() const {

@@ -58,14 +58,14 @@ void World::addIndividuals(int number_of_individuals, int number_of_infected, in
 
 void World::updatePositions() {
     float x, y;
-    for (int i = 0; i < individuals.size(); i++){
-        x = individuals[i].getPosition().getX() + velocity * timeStep * individuals[i].getDirection().getX();
-        y = individuals[i].getPosition().getY() + velocity * timeStep * individuals[i].getDirection().getY();
+    for (auto & individual : individuals){
+        x = individual.getPosition().getX() + velocity * timeStep * individual.getDirection().getX();
+        y = individual.getPosition().getY() + velocity * timeStep * individual.getDirection().getY();
         if (x > length || y > width){
-            individuals[i].relocate(length, width);
+            individual.relocate(length, width);
             continue;
         }
-        individuals[i].setPosition(Point(x, y));
+        individual.setPosition(Point(x, y));
     }
 }
 
