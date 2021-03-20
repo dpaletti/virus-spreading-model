@@ -9,6 +9,7 @@
 #include "Infected.h"
 #include "helper.h"
 #include "MpiHandler.h"
+#include "JsonHandler.h"
 
 int main(int argc, char** argv) {
 
@@ -31,6 +32,7 @@ int main(int argc, char** argv) {
     std::pair<float, float> worldSize = inputParser.getWorldSize();
     World world = World(worldSize.second, worldSize.first, countries, inputParser.getVelocity(), inputParser.getMaximumSpreadingDistance(), inputParser.getTimeStep());
     MpiHandler mpiHandler = MpiHandler(my_rank, world_size);
+    JsonHandler jsonHandler = JsonHandler();
     world.printWorld();
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -68,10 +70,10 @@ int main(int argc, char** argv) {
         }
 
         // Serialize infected list
-        serialized = serialize_list(infected_list);
+        jsonHandler.serialize_list(infected_list);
 
         // Gather current infected from all processes
-        mpiHandler.spread_infected(serialized, infected_list);
+        mpiHandler.spread_infected(jsonHandler, infected_list);
 
         MPI_Barrier(MPI_COMM_WORLD);
 
@@ -80,7 +82,7 @@ int main(int argc, char** argv) {
         printf("\n\nMAIN -> RANK: %d, STEP %d\n\n", my_rank, step);
 
         // Deserialize received infected list
-        infected_list = deserialize_list(mpiHandler.getCurrentSerializedInfected());
+        infected_list = jsonHandler.deserialize_list(mpiHandler.getCurrentSerializedInfected());
 
         spread_virus(world, infected_list);
     }

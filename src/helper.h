@@ -13,8 +13,6 @@
 
 #endif //VIRUS_SPREADING_MODEL_HELPER_H
 
-rapidjson::StringBuffer serialize_list(const std::vector<Infected>& infected_list);
-std::vector<Infected> deserialize_list(const char* current_serialized_infected);
 bool update_contacts_intersection(Individual *individual, std::vector<Infected> current_intersection, World world);
 bool update_contacts_difference(bool transmission, Individual *individual, std::vector<Infected> current_difference, World world);
 void spread_virus (World world, const std::vector<Infected>& infected_list);

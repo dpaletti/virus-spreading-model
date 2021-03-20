@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include "InputParser.h"
 #include "Infected.h"
+#include "JsonHandler.h"
 
 class MpiHandler {
 private:
@@ -22,7 +23,7 @@ public:
 
     char* getCurrentSerializedInfected();
     int split_individuals(InputParser *inputParser);
-    void spread_infected(rapidjson::StringBuffer& serialized, std::vector<Infected> infected_list);
+    void spread_infected(JsonHandler &jsonHandler, std::vector<Infected> infected_list);
     void broadcast_global_infected();
 private:
     void allocateInfected();

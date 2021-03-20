@@ -3,6 +3,7 @@
 #include <mpi.h>
 #include "MpiHandler.h"
 #include "helper.h"
+#include "JsonHandler.h"
 
 char *MpiHandler::getCurrentSerializedInfected() {
     return current_serialized_infected;
@@ -25,12 +26,13 @@ int MpiHandler::split_individuals(InputParser *inputParser) {
     return individuals;
 }
 
-void MpiHandler::spread_infected(rapidjson::StringBuffer &serialized,
+void MpiHandler::spread_infected(JsonHandler &jsonHandler,
                                  std::vector<Infected> infected_list) {
 
     MPI_Status status;
     int destination = my_rank+1;
     rapidjson::Document document;
+    const rapidjson::StringBuffer& serialized = jsonHandler.getSerialized();
     if (my_rank == 0) {
         MPI_Send(serialized.GetString(), strlen(serialized.GetString()), MPI_CHAR, destination, 0, MPI_COMM_WORLD);
         MPI_Probe(world_size - 1, 0, MPI_COMM_WORLD, &status);
@@ -54,10 +56,10 @@ void MpiHandler::spread_infected(rapidjson::StringBuffer &serialized,
             temp_infected->Deserialize(e.GetObject());
             infected_list.push_back(*temp_infected);
         }
-        serialized = serialize_list(infected_list);
+        jsonHandler.serialize_list(infected_list);
         if (my_rank == world_size-1)
             destination = 0;
-        MPI_Send((void *) serialized.GetString(), serialized.GetSize(), MPI_CHAR, destination, 0, MPI_COMM_WORLD);
+        MPI_Send((void *) jsonHandler.getSerialized().GetString(), jsonHandler.getSerialized().GetSize(), MPI_CHAR, destination, 0, MPI_COMM_WORLD);
     }
     current_serialized_infected[*message_size] = '\0';
 

@@ -10,44 +10,6 @@
 #include "World.h"
 
 // TODO: move all methods except serialize and deserialize to a coordination (think of a better name) class
-// TODO: move serialize and deserialize to a helper file (no state)
-
-
-rapidjson::StringBuffer serialize_list(const std::vector<Infected>& infected_list){
-    rapidjson::StringBuffer sb;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-    writer.StartObject();
-    writer.Key("infected");
-    writer.StartArray();
-    for (const auto &item : infected_list) {
-        item.Serialize(writer);
-    }
-    writer.EndArray();
-    writer.EndObject();
-   return sb;
-
-}
-
-std::vector<Infected> deserialize_list(const char* current_serialized_infected){
-    //TODO not working current_serialized_infected prints out weird things
-    std::vector<Infected> infected_list;
-    rapidjson::Document document;
-    Infected *temp_infected;
-
-    document.Parse<rapidjson::kParseStopWhenDoneFlag>(current_serialized_infected);
-    for(auto& e : document.FindMember("infected")->value.GetArray()){
-        try {
-            temp_infected = new Infected();
-        }catch(std::bad_alloc&){
-            printf("Bad Alloc at deserialize list");
-            abort();
-        }
-        temp_infected->Deserialize(e.GetObject());
-        infected_list.push_back(*temp_infected);
-    }
-    return infected_list;
-
-}
 
 bool update_contacts_intersection(Individual *individual, std::vector<Infected> current_intersection, World world){
     float distance;
