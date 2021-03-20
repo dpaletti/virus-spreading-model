@@ -2,19 +2,19 @@
 #include <cmath>
 #include <mpi.h>
 #include "MpiHandler.h"
-#include "helper.h"
 #include "JsonHandler.h"
+#include "World.h"
 
 char *MpiHandler::getCurrentSerializedInfected() {
     return current_serialized_infected;
 }
 
-int MpiHandler::split_individuals(InputParser *inputParser) {
-    int individuals = std::floor(inputParser->getIndividualsNumber() / world_size);
+int MpiHandler::split_individuals(InputParser &inputParser) {
+    int individuals = std::floor(inputParser.getIndividualsNumber() / world_size);
     if (my_rank == 0) {
         MPI_Send(&individuals, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
         MPI_Recv(individuals_split_accumulator, 1, MPI_INT, world_size-1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        individuals += inputParser->getIndividualsNumber() - *individuals_split_accumulator;
+        individuals += inputParser.getIndividualsNumber() - *individuals_split_accumulator;
     } else {
         int destination = my_rank + 1;
         MPI_Recv(individuals_split_accumulator, 1, MPI_INT, my_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -66,18 +66,11 @@ void MpiHandler::spread_infected(JsonHandler &jsonHandler,
 }
 
 void MpiHandler::broadcast_global_infected() {
-    MPI_Status status;
-    if(my_rank == 0){
-        MPI_Bcast(current_serialized_infected, strlen(current_serialized_infected), MPI_CHAR, 0, MPI_COMM_WORLD);
-    }else{
-        MPI_Probe(0,0,MPI_COMM_WORLD,&status);
-        MPI_Get_count(&status,MPI_CHAR,message_size);
+    *message_size = strlen(current_serialized_infected);
+    MPI_Bcast(message_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    if (my_rank != 0)
         allocateInfected();
-        printf("\n\n\nMessage Size in broadcast: %d\n\n\n", *message_size);
-        MPI_Bcast(current_serialized_infected,*message_size,MPI_CHAR,0,MPI_COMM_WORLD);
-        (current_serialized_infected)[*message_size] = '\0';
-    }
-
+    MPI_Bcast(current_serialized_infected, *message_size, MPI_CHAR, 0, MPI_COMM_WORLD);
 }
 
 void MpiHandler::allocateInfected() {
@@ -95,5 +88,13 @@ MpiHandler::~MpiHandler() {
     free(message_size);
     free(current_serialized_infected);
 
+}
+
+int MpiHandler::getMyRank() const {
+    return my_rank;
+}
+
+int MpiHandler::getWorldSize() const {
+    return world_size;
 }
 

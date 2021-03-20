@@ -16,13 +16,16 @@ private:
     int* message_size = (int*)malloc(sizeof(int));
     char* current_serialized_infected = nullptr;
 public:
+    int getMyRank() const;
+
+    int getWorldSize() const;
 
     MpiHandler(int myRank, int worldSize);
 
     virtual ~MpiHandler();
 
     char* getCurrentSerializedInfected();
-    int split_individuals(InputParser *inputParser);
+    int split_individuals(InputParser &inputParser);
     void spread_infected(JsonHandler &jsonHandler, std::vector<Infected> infected_list);
     void broadcast_global_infected();
 private:

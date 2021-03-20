@@ -8,6 +8,9 @@
 #include <exception>
 
 class Point {
+private:
+    float x, y;
+
 public:
     Point(float x, float y);
 
@@ -26,8 +29,6 @@ public:
     void Serialize(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer) const;
     void Deserialize(const rapidjson::Value &obj);
 
-private:
-    float x, y;
 
 };
 

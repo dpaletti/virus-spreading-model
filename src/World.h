@@ -6,13 +6,36 @@
 #include "Country.h"
 #include "Grid.h"
 #include "Individual.h"
+#include "InputParser.h"
+#include "MpiHandler.h"
 
 class World {
-public:
-    const std::vector<Country> &getCountries() const;
+private:
+    bool update_contacts_intersection(Individual *individual, std::vector<Infected> current_intersection) const;
+
+    bool update_contacts_difference(bool transmission, Individual *individual,
+                                    const std::vector<Infected> &current_difference) const;
+
+    float velocity;
+    float maximumSpreadingDistance;
+    float timeStep;
+    float length, width;
+    std::vector<Infected> infected_list;
+
+    static const int susceptible_to_infected = 600;
+
+    static const int infected_to_immune = 864000; //10 days
+    static const int immune_to_susceptible = 7776000; //3 months
+
+    int day_length;
+
+    std::vector<Individual> individuals;
+    std::vector<Country> countries;
 
 public:
-    World(float length, float width, std::vector<Country> countries, float velocity, float maximumSpreadingDistance, float timeStep);
+    World(InputParser &inputParser, MpiHandler &mpiHandler);
+
+    const std::vector<Country> &getCountries() const;
 
     float getLength() const;
 
@@ -30,31 +53,25 @@ public:
 
     float getMaximumSpreadingDistance() const;
 
-    const float getTimeStep();
+    float getTimeStep() const;
 
-private:
-    float velocity;
-    float maximumSpreadingDistance;
-    float timeStep;
-    float length, width;
+    void spread_virus();
 
-public:
-    float getVelocity() const;
+    void buildInfectedList();
 
-    static const int getSusceptibleToInfected();
+    const std::vector<Infected> &getInfectedList() const;
 
-    static const int getInfectedToImmune();
+    void setInfectedList(const std::vector<Infected> &infectedList);
 
-    static const int getImmuneToSusceptible();
+    int getIndividualsNumber();
 
-private:
-    //seconds
-    static const int susceptible_to_infected = 600;//10 minutes
-    static const int infected_to_immune = 864000; //10 days
-    static const int immune_to_susceptible = 7776000; //3 months
+    static int getSusceptibleToInfected();
 
-    std::vector<Individual> individuals;
-    std::vector<Country> countries;
+    static int getInfectedToImmune();
+
+    static int getImmuneToSusceptible();
+
+    int getDayLength() const;
 
 };
 

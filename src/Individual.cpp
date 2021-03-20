@@ -13,12 +13,8 @@ const Point &Individual::getDirection() const {
     return direction;
 }
 
-bool Individual::isInfected1() const {
+bool Individual::infected() const {
     return isInfected;
-}
-
-bool Individual::isImmune1() const {
-    return isImmune;
 }
 
 const Point &Individual::getPosition() const {

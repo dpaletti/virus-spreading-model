@@ -2,9 +2,11 @@
 #include <iostream>
 #include <utility>
 #include <algorithm>
+#include <cmath>
 #include "World.h"
 #include "Grid.h"
-
+#include "InputParser.h"
+#include "MpiHandler.h"
 
 
 float World::getLength() const {
@@ -34,8 +36,17 @@ void World::place_countries() {
     }
 }
 
-World::World(float length, float width, std::vector<Country> countries, float velocity, float maximumSpreadingDistance, float timeStep) : length(length), width(width),
-                                                                                 countries(std::move(countries)), velocity(velocity), maximumSpreadingDistance(maximumSpreadingDistance), timeStep(timeStep) {place_countries();}
+World::World(InputParser &inputParser, MpiHandler &mpiHandler) :
+    length(inputParser.getWorldSize().second),
+    width(inputParser.getWorldSize().first),
+    countries(std::move(Country::buildCountries(inputParser.getCountries()))),
+    velocity(inputParser.getVelocity()),
+    maximumSpreadingDistance(inputParser.getMaximumSpreadingDistance()),
+    timeStep(inputParser.getTimeStep()){
+    place_countries();
+    day_length = std::floor(86400 / inputParser.getTimeStep());
+    addIndividuals(mpiHandler.split_individuals(inputParser), std::floor(inputParser.getInfectedNumber() / mpiHandler.getWorldSize()), mpiHandler.getMyRank());
+}
 
 const std::vector<Country> &World::getCountries() const {
     return countries;
@@ -77,25 +88,106 @@ float World::getMaximumSpreadingDistance() const {
     return maximumSpreadingDistance;
 }
 
-const float World::getTimeStep() {
+float World::getTimeStep() const {
     return timeStep;
 }
 
-float World::getVelocity() const {
-    return velocity;
-}
-
-const int World::getSusceptibleToInfected() {
+int World::getSusceptibleToInfected() {
     return susceptible_to_infected;
 }
 
-const int World::getInfectedToImmune() {
+int World::getInfectedToImmune() {
     return infected_to_immune;
 }
 
-const int World::getImmuneToSusceptible() {
+int World::getImmuneToSusceptible() {
     return immune_to_susceptible;
 }
+
+bool World::update_contacts_intersection(Individual *individual, std::vector<Infected> current_intersection) const{
+    float distance;
+    bool transmission = false;
+    Point curr_position = individual->getPosition();
+
+
+    for (Contact contact : individual->getRecentContacts()) {
+        auto curr_infected = std::find(current_intersection.begin(), current_intersection.end(), contact);
+        if (curr_infected != current_intersection.end()){
+            distance = curr_position.getDistance(curr_infected.base()->getPosition());
+            if (distance <= getMaximumSpreadingDistance()){
+                contact.setContactTime(contact.getContactTime() + getTimeStep());
+                if (contact.getContactTime() >= getSusceptibleToInfected())
+                    transmission = true;
+            } else {
+                individual->removeContact(contact.getId());
+            }
+        }
+    }
+    return transmission;
+}
+
+bool World::update_contacts_difference(bool transmission, Individual *individual, const std::vector<Infected>& current_difference) const{
+    float distance;
+    Point curr_position = individual->getPosition();
+    for (const auto &inf : current_difference) {
+        distance = curr_position.getDistance(inf.getPosition());
+        if (distance <= getMaximumSpreadingDistance()){
+            individual->addContact(inf.getId(), getTimeStep());
+            transmission = true;
+        }
+    }
+    return transmission;
+}
+
+void World::spread_virus (){
+    std::vector<Infected> current_intersection;
+    std::vector<Infected> current_difference;
+    std::pair<std::vector<Infected>, std::vector<Infected>> intersection_and_difference;
+    bool transmission;
+
+    for (Individual individual : getIndividuals()) {
+        intersection_and_difference = individual.getIntersectionAndDifference(infected_list);
+        current_intersection = intersection_and_difference.first;
+        current_difference = intersection_and_difference.second;
+
+        transmission = update_contacts_intersection(&individual, current_intersection);
+        transmission = update_contacts_difference(transmission, &individual, current_difference);
+
+        individual.update(transmission, getTimeStep());
+    }
+}
+
+int World::getDayLength() const {
+    return day_length;
+}
+
+int World::getIndividualsNumber() {
+   return individuals.size();
+}
+
+void World::buildInfectedList() {
+    Individual current_individual;
+    infected_list.clear();
+    for (int i = 0; i < getIndividualsNumber(); i++){
+        current_individual = getIndividuals()[i];
+        if (current_individual.infected()){
+            infected_list.emplace_back(current_individual.getPosition(), current_individual.getId());
+        }
+    }
+
+}
+
+const std::vector<Infected> &World::getInfectedList() const {
+    return infected_list;
+}
+
+void World::setInfectedList(const std::vector<Infected> &infectedList) {
+    infected_list = infectedList;
+}
+
+
+
+
 
 
 

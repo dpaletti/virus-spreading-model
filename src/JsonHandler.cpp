@@ -36,5 +36,5 @@ const rapidjson::StringBuffer &JsonHandler::getSerialized() const {
     return serialized;
 }
 
-JsonHandler::JsonHandler() {}
+JsonHandler::JsonHandler() = default;
 
