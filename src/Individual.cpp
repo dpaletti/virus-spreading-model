@@ -17,6 +17,10 @@ bool Individual::infected() const {
     return isInfected;
 }
 
+bool Individual::immune() const {
+    return isImmune;
+}
+
 const Point &Individual::getPosition() const {
     return position;
 }
@@ -44,15 +48,6 @@ Individual::Individual() = default;
 const std::string &Individual::getId() const {
     return id;
 }
-
-/**Contact* Individual::findContactById(std :: string basicString) {
-    auto iterator = std :: find_if(recent_contacts.begin(),recent_contacts.end(),
-                                   [&](const std::pair<std::string, float>& cont) { return (cont.first == basicString);});
-    if(iterator != recent_contacts.end())
-        return iterator.base();
-    else
-        return nullptr;
-}**/
 
 void Individual::addContact(const std::string& basicString, float timeStep) {
     recent_contacts.emplace_back(basicString, timeStep);

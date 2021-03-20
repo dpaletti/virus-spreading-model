@@ -69,6 +69,10 @@ public:
 
     static int getInfectedToImmune();
 
+    Country findCountry(Individual &individual);
+
+    void computeStats();
+
     static int getImmuneToSusceptible();
 
     int getDayLength() const;

@@ -42,5 +42,7 @@ int main(int argc, char** argv) {
         world.spread_virus();
     }
 
+    world.computeStats();
+
     MPI_Finalize();
 }

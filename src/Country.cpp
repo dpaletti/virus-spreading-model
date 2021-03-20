@@ -1,8 +1,9 @@
 #include "Country.h"
 #include <stdexcept>
 #include <utility>
+#include <iostream>
 
- const std::string &Country::getName() const{
+const std::string &Country::getName() const{
     return name;
 }
 
@@ -42,6 +43,24 @@ std::vector<Country> Country::buildCountries(std::list<std::pair<float, float>> 
     return out;
 }
 
+void Country::updateImmuneCount() {
+    immune_count++;
+}
+
+void Country::updateInfectedCount() {
+    infected_count++;
+}
+
+void Country::updateSusceptibleCount() {
+    susceptible_count++;
+}
+
+void Country::resetCounters() {
+    immune_count = 0;
+    infected_count = 0;
+    susceptible_count = 0;
+}
+
 Country::Country() = default;
 
 
@@ -49,4 +68,6 @@ bool operator==(const Country &c1, const Country& c2) {
     return c1.getName() == c2.getName();
 }
 
-
+void Country::printStats(){
+    std::cout << "Country " << name << " has " << infected_count << " infected, " << immune_count << " immune and " << susceptible_count << " susceptible." << std::endl;
+}

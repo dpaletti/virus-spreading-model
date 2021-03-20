@@ -7,6 +7,7 @@
 #include "Point.h"
 #include "Contact.h"
 #include "Infected.h"
+#include "Country.h"
 
 class Individual {
 private:
@@ -25,6 +26,7 @@ public:
     const std::string &getId() const;
     const Point &getDirection() const;
     bool infected() const;
+    bool immune() const;
     const Point &getPosition() const;
     void relocate(float bound_x, float bound_y);
     void addContact(const std :: string& basicString, float timeStep);

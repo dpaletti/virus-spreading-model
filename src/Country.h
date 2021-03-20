@@ -27,10 +27,24 @@ public:
 
     static std::vector<Country>buildCountries(std::list<std::pair<float, float>> countries);
 
+    void updateImmuneCount();
+
+    void updateInfectedCount();
+
+    void updateSusceptibleCount();
+
+    void resetCounters();
+
+    void printStats();
+
+
 private:
     std::string name;
     float length{}, width{};
     Point anchor_point;
+    int immune_count = 0;
+    int infected_count = 0;
+    int susceptible_count = 0;
 };
 
 

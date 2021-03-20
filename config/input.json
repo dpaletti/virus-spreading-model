@@ -29,5 +29,5 @@
   ],
   "velocity": 10,
   "maximum_spreading_distance": 5,
-  "time_step": 5
+  "time_step": 3600
 }
