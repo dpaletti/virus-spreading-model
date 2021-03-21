@@ -5,8 +5,8 @@
 #include "JsonHandler.h"
 #include "World.h"
 
-char *MpiHandler::getCurrentSerializedInfected() {
-    return current_serialized_infected;
+char *MpiHandler::getReceivedMessage() {
+    return received_message;
 }
 
 int MpiHandler::split_individuals(InputParser &inputParser) {
@@ -26,58 +26,20 @@ int MpiHandler::split_individuals(InputParser &inputParser) {
     return individuals;
 }
 
-void MpiHandler::spread_infected(JsonHandler &jsonHandler,
-                                 std::vector<Infected> infected_list) {
 
-    MPI_Status status;
-    int destination = my_rank+1;
-    rapidjson::Document document;
-    const rapidjson::StringBuffer& serialized = jsonHandler.getSerialized();
-    if (my_rank == 0) {
-        MPI_Send(serialized.GetString(), strlen(serialized.GetString()), MPI_CHAR, destination, 0, MPI_COMM_WORLD);
-        MPI_Probe(world_size - 1, 0, MPI_COMM_WORLD, &status);
-        MPI_Get_count(&status, MPI_CHAR, message_size);
-        allocateInfected();
-        MPI_Recv(current_serialized_infected, *message_size, MPI_CHAR, world_size - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    } else {
-        Infected *temp_infected;
-        MPI_Probe(my_rank - 1, 0, MPI_COMM_WORLD, &status);
-        MPI_Get_count(&status, MPI_CHAR, message_size);
-        allocateInfected();
-        MPI_Recv(current_serialized_infected, *message_size, MPI_CHAR, my_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        document.Parse<rapidjson::kParseStopWhenDoneFlag>((const char *) current_serialized_infected);
-        for(auto& e : document.FindMember("infected")->value.GetArray()){
-            try {
-                temp_infected = new Infected();
-            }catch(std::bad_alloc&){
-                printf("\nBad Alloc in spread infected at rank %d\n", my_rank);
-                abort();
-            }
-            temp_infected->Deserialize(e.GetObject());
-            infected_list.push_back(*temp_infected);
-        }
-        jsonHandler.serialize_list(infected_list);
-        if (my_rank == world_size-1)
-            destination = 0;
-        MPI_Send((void *) jsonHandler.getSerialized().GetString(), jsonHandler.getSerialized().GetSize(), MPI_CHAR, destination, 0, MPI_COMM_WORLD);
-    }
-    current_serialized_infected[*message_size] = '\0';
-
-}
-
-void MpiHandler::broadcast_global_infected() {
-    *message_size = strlen(current_serialized_infected);
+void MpiHandler::broadcast() {
+    *message_size = strlen(received_message);
     MPI_Bcast(message_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
     if (my_rank != 0)
-        allocateInfected();
-    MPI_Bcast(current_serialized_infected, *message_size, MPI_CHAR, 0, MPI_COMM_WORLD);
+        allocateReceivedMessage();
+    MPI_Bcast(received_message, *message_size, MPI_CHAR, 0, MPI_COMM_WORLD);
 }
 
-void MpiHandler::allocateInfected() {
-    if (current_serialized_infected == nullptr)
-        current_serialized_infected = (char*)malloc(sizeof(char)* ((*message_size)+1));
+void MpiHandler::allocateReceivedMessage() {
+    if (received_message == nullptr)
+        received_message = (char*)malloc(sizeof(char) * ((*message_size) + 1));
     else
-        current_serialized_infected = (char*)realloc(current_serialized_infected, sizeof(char)*((*message_size)+1));
+        received_message = (char*)realloc(received_message, sizeof(char) * ((*message_size) + 1));
 
 }
 
@@ -86,7 +48,7 @@ MpiHandler::MpiHandler(int myRank, int worldSize) : my_rank(myRank), world_size(
 MpiHandler::~MpiHandler() {
     free(individuals_split_accumulator);
     free(message_size);
-    free(current_serialized_infected);
+    free(received_message);
 
 }
 
@@ -97,4 +59,29 @@ int MpiHandler::getMyRank() const {
 int MpiHandler::getWorldSize() const {
     return world_size;
 }
+
+void MpiHandler::ring(JsonHandler &jsonHandler, World *world, void(JsonHandler::*fn)(char*, World*)) {
+    MPI_Status status;
+    int destination = my_rank+1;
+    std::string serialized = jsonHandler.getSerialized();
+    if (my_rank == 0) {
+        MPI_Send(serialized.c_str(), strlen(serialized.c_str()), MPI_CHAR, destination, 0, MPI_COMM_WORLD);
+        MPI_Probe(world_size - 1, 0, MPI_COMM_WORLD, &status);
+        MPI_Get_count(&status, MPI_CHAR, message_size);
+        allocateReceivedMessage();
+        MPI_Recv(received_message, *message_size, MPI_CHAR, world_size - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    } else {
+        MPI_Probe(my_rank - 1, 0, MPI_COMM_WORLD, &status);
+        MPI_Get_count(&status, MPI_CHAR, message_size);
+        allocateReceivedMessage();
+        MPI_Recv(received_message, *message_size, MPI_CHAR, my_rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        ((&jsonHandler)->*fn)(received_message, world);
+        if (my_rank == world_size-1)
+            destination = 0;
+        MPI_Send((void *) jsonHandler.getSerialized().c_str(), strlen(jsonHandler.getSerialized().c_str()), MPI_CHAR, destination, 0, MPI_COMM_WORLD);
+    }
+    received_message[*message_size] = '\0';
+}
+
+
 

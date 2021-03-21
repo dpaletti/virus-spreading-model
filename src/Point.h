@@ -24,7 +24,7 @@ public:
 
     float getDistance(Point a);
 
-    std::string toString();
+    std::string toString() const;
 
     void Serialize(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer) const;
     void Deserialize(const rapidjson::Value &obj);

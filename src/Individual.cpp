@@ -4,6 +4,7 @@
 #include <random>
 #include <algorithm>
 #include <utility>
+#include <chrono>
 
 Individual::Individual(bool isInfected, float bound_x, float bound_y, std::string id) : isInfected(isInfected), isImmune(false), id(std::move(id)){
     randomize_position(bound_x, bound_y);
@@ -27,6 +28,7 @@ const Point &Individual::getPosition() const {
 
 void Individual::randomize_position(float bound_x, float bound_y) {
     std::default_random_engine generator;
+    generator.seed(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<double> distribution(-1, 1);
     std::uniform_real_distribution<double> distribution_bound_x(0, bound_x);
     std::uniform_real_distribution<double> distribution_bound_y(0, bound_y);

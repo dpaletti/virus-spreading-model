@@ -9,6 +9,8 @@
 #include "InputParser.h"
 #include "MpiHandler.h"
 
+class MpiHandler;
+
 class World {
 private:
     bool update_contacts_intersection(Individual *individual, std::vector<Infected> current_intersection) const;
@@ -59,7 +61,7 @@ public:
 
     void buildInfectedList();
 
-    const std::vector<Infected> &getInfectedList() const;
+    std::vector<Infected> &getInfectedList();
 
     void setInfectedList(const std::vector<Infected> &infectedList);
 
@@ -69,13 +71,16 @@ public:
 
     static int getInfectedToImmune();
 
-    Country findCountry(Individual &individual);
+    Country *findCountry(Individual &individual);
 
     void computeStats();
 
     static int getImmuneToSusceptible();
 
     int getDayLength() const;
+
+    Country *findCountryByName(const std::string& country_name);
+    void printStats();
 
 };
 

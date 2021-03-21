@@ -19,7 +19,7 @@ bool Point::equals(Point a) const {
     return (a.getX() == getX() && a.getY() == getY());
 }
 
-std::string Point::toString() {
+std::string Point::toString() const {
     std::string point = "(" +  std::to_string(x) + "," + std::to_string(y) +")";
     return point;
 }

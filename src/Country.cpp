@@ -71,3 +71,27 @@ bool operator==(const Country &c1, const Country& c2) {
 void Country::printStats(){
     std::cout << "Country " << name << " has " << infected_count << " infected, " << immune_count << " immune and " << susceptible_count << " susceptible." << std::endl;
 }
+
+int Country::getImmuneCount() const {
+    return immune_count;
+}
+
+int Country::getInfectedCount() const {
+    return infected_count;
+}
+
+int Country::getSusceptibleCount() const {
+    return susceptible_count;
+}
+
+void Country::setImmuneCount(int immuneCount) {
+    immune_count = immuneCount;
+}
+
+void Country::setInfectedCount(int infectedCount) {
+    infected_count = infectedCount;
+}
+
+void Country::setSusceptibleCount(int susceptibleCount) {
+    susceptible_count = susceptibleCount;
+}

@@ -8,19 +8,29 @@
 
 #include <rapidjson/stringbuffer.h>
 #include "Infected.h"
+#include "Country.h"
+#include "World.h"
+
+class World;
 
 class JsonHandler {
 public:
-    void serialize_list(const std::vector<Infected>& infected_list);
+    void serialize_infected_list(const std::vector<Infected>& infected_list);
 
     JsonHandler();
 
-    std::vector<Infected> deserialize_list(const char* current_serialized_infected);
-    const rapidjson::StringBuffer &getSerialized() const;
+    std::vector<Infected> deserialize_infected_list(char* received_message);
+    std::string getSerialized() const;
+    void serialize_stats(const std::vector<Country>& countries);
+    void accumulate_infected(char* received_message, World *world);
+    void accumulate_stats(char* received_message, World *world);
+    void parse(char* received_message);
+    void update_stats(char* received_message, World *world);
 
 
 private:
-    rapidjson::StringBuffer serialized;
+    rapidjson::Document document;
+    std::string serialized_string;
 
 };
 

@@ -4,9 +4,11 @@
 
 
 #include <malloc.h>
+#include <functional>
 #include "InputParser.h"
 #include "Infected.h"
 #include "JsonHandler.h"
+#include "World.h"
 
 class MpiHandler {
 private:
@@ -14,7 +16,7 @@ private:
     int world_size;
     int* individuals_split_accumulator = (int*)malloc(sizeof(int));
     int* message_size = (int*)malloc(sizeof(int));
-    char* current_serialized_infected = nullptr;
+    char* received_message = nullptr;
 public:
     int getMyRank() const;
 
@@ -24,12 +26,13 @@ public:
 
     virtual ~MpiHandler();
 
-    char* getCurrentSerializedInfected();
+    char* getReceivedMessage();
     int split_individuals(InputParser &inputParser);
-    void spread_infected(JsonHandler &jsonHandler, std::vector<Infected> infected_list);
-    void broadcast_global_infected();
+    void broadcast();
+
+    void ring(JsonHandler &jsonHandler, World *world, void(JsonHandler::*fn)(char*, World*));
 private:
-    void allocateInfected();
+    void allocateReceivedMessage();
 
 
 

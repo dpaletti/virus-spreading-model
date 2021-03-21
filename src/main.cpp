@@ -19,8 +19,6 @@ int main(int argc, char** argv) {
     InputParser inputParser = InputParser("../config/input.json");
     World world = World(inputParser, mpiHandler);
 
-    world.printWorld();
-
     JsonHandler jsonHandler = JsonHandler();
     // Infected list
 
@@ -29,20 +27,27 @@ int main(int argc, char** argv) {
 
         world.buildInfectedList();
 
-        jsonHandler.serialize_list(world.getInfectedList());
+        jsonHandler.serialize_infected_list(world.getInfectedList());
 
-        mpiHandler.spread_infected(jsonHandler, world.getInfectedList());
+        mpiHandler.ring(jsonHandler, &world, &JsonHandler::accumulate_infected);
 
-        printf("\nRANK %d at step %d\n", my_rank, step);
+        mpiHandler.broadcast();
 
-        mpiHandler.broadcast_global_infected();
-
-        world.setInfectedList(jsonHandler.deserialize_list(mpiHandler.getCurrentSerializedInfected()));
+        world.setInfectedList(jsonHandler.deserialize_infected_list(mpiHandler.getReceivedMessage()));
 
         world.spread_virus();
     }
 
     world.computeStats();
+    jsonHandler.serialize_stats(world.getCountries());
+
+    mpiHandler.ring(jsonHandler, &world, &JsonHandler::accumulate_stats);
+    mpiHandler.broadcast();
+
+    jsonHandler.update_stats(mpiHandler.getReceivedMessage(), &world);
+    world.printStats();
+
+
 
     MPI_Finalize();
 }

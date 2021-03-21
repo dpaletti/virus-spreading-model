@@ -31,6 +31,12 @@ public:
 
     void updateInfectedCount();
 
+    int getImmuneCount() const;
+
+    int getInfectedCount() const;
+
+    int getSusceptibleCount() const;
+
     void updateSusceptibleCount();
 
     void resetCounters();
@@ -43,6 +49,14 @@ private:
     float length{}, width{};
     Point anchor_point;
     int immune_count = 0;
+public:
+    void setImmuneCount(int immuneCount);
+
+    void setInfectedCount(int infectedCount);
+
+    void setSusceptibleCount(int susceptibleCount);
+
+private:
     int infected_count = 0;
     int susceptible_count = 0;
 };

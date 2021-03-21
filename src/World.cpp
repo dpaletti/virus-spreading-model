@@ -58,6 +58,9 @@ void World::printWorld() {
     for (auto &country : countries) {
         std::cout << "Country " << country.getName() << " has length of " << country.getLength() << " and a width of " << country.getWidth() << " is anchored in " << country.getAnchorPoint().toString() << std::endl;
     }
+    for (const auto &individual : individuals) {
+        std::cout << "Individual " << individual.getId() << " on " << individual.getPosition().toString();
+    }
 
 }
 
@@ -72,7 +75,7 @@ void World::updatePositions() {
     for (auto & individual : individuals){
         x = individual.getPosition().getX() + velocity * timeStep * individual.getDirection().getX();
         y = individual.getPosition().getY() + velocity * timeStep * individual.getDirection().getY();
-        if (x > length || y > width){
+        if (x > length || y > width || x < 0 || y < 0){
             individual.relocate(length, width);
             continue;
         }
@@ -177,7 +180,7 @@ void World::buildInfectedList() {
 
 }
 
-const std::vector<Infected> &World::getInfectedList() const {
+std::vector<Infected> &World::getInfectedList() {
     return infected_list;
 }
 
@@ -185,19 +188,14 @@ void World::setInfectedList(const std::vector<Infected> &infectedList) {
     infected_list = infectedList;
 }
 
-
-
-
-
-Country World::findCountry(Individual &individual){
+Country* World::findCountry(Individual &individual){
     Point point = individual.getPosition();
     Point anchor_point;
-    printf("\n\nEvaluating individual %s a point (%f, %f)\n\n", individual.getId().c_str(), point.getX(), point.getY());
     for (auto &country : countries) {
         anchor_point = country.getAnchorPoint();
         if (point.getX() >= anchor_point.getX() && point.getX() <= anchor_point.getX() + country.getLength()){
             if (point.getY() >= anchor_point.getY() && point.getY() <= anchor_point.getY() + country.getWidth())
-                return country;
+                return &country;
         }
     }
     std::string error = "\n\nIndividual " + individual.getId() + " with position " + point.toString() + " does not belong to any country\n\n";
@@ -205,7 +203,7 @@ Country World::findCountry(Individual &individual){
 }
 
 void World::computeStats() {
-    Country country;
+    Country* country;
     for (auto &individual : individuals) {
         try{
             country = findCountry(individual);
@@ -214,13 +212,24 @@ void World::computeStats() {
             continue; //individual does not belong to any country
         }
         if (individual.immune())
-            country.updateImmuneCount();
+            country->updateImmuneCount();
         else if (individual.infected())
-            country.updateInfectedCount();
+            country->updateInfectedCount();
         else if (!individual.infected() && !individual.immune())
-            country.updateSusceptibleCount();
+            country->updateSusceptibleCount();
     }
+}
 
+Country *World::findCountryByName(const std::string& country_name) {
+    for (auto &country : countries) {
+        if(country.getName() == country_name)
+            return &country;
+    }
+    std::string error_message = "Could not find country with name " + country_name;
+    throw std::runtime_error(error_message);
+}
+
+void World::printStats() {
     for (auto &c : countries) {
         c.printStats();
         c.resetCounters();
