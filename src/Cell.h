@@ -6,6 +6,13 @@
 
 class Cell {
 public:
+    /**
+     * Cell class represent a cell in the grid that constitutes the world
+     * @param anchorPoint
+     * @param length
+     * @param width
+     * @param isOccupied
+     */
     Cell(const Point &anchorPoint, float length, float width, bool isOccupied);
 
     Cell();
@@ -29,6 +36,9 @@ public:
     bool equals(Cell a);
 
 private:
+    /**
+     * Represent where the cell is anchored in the grid
+     */
     Point anchor_point;
     float length;
     float width;

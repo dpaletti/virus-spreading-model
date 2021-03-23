@@ -2,7 +2,7 @@
 
 Cell::Cell(const Point &anchorPoint, float length, float width, bool isOccupied) : anchor_point(anchorPoint),
                                                                                    length(length), width(width),
-                                                                                   is_occupied(isOccupied) {}
+                                                                                   is_occupied(isOccupied){}
 
 const Point &Cell::getAnchorPoint() const {
     return anchor_point;
