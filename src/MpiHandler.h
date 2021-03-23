@@ -9,6 +9,7 @@
 #include "Infected.h"
 #include "JsonHandler.h"
 #include "World.h"
+#include "mpi.h"
 
 class MpiHandler {
 private:
@@ -17,12 +18,13 @@ private:
     int* individuals_split_accumulator = (int*)malloc(sizeof(int));
     int* message_size = (int*)malloc(sizeof(int));
     char* received_message = nullptr;
+    MPI_Comm communicator;
 public:
     int getMyRank() const;
 
     int getWorldSize() const;
 
-    MpiHandler(int myRank, int worldSize);
+    MpiHandler(int myRank, int worldSize, MPI_Comm communicator);
 
     virtual ~MpiHandler();
 

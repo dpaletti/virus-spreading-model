@@ -43,7 +43,7 @@ public:
 
     float getWidth() const;
 
-    void place_countries();
+    void place_countries(int my_rank);
 
     const std::vector<Individual> &getIndividuals() const;
 

@@ -19,7 +19,7 @@ float World::getWidth() const {
 
 
 
-void World::place_countries() {
+void World::place_countries(int my_rank) {
     int number_of_countries = getCountries().size();
     Grid grid = Grid(number_of_countries, getLength(), getWidth());
     Country* current_country;
@@ -28,7 +28,8 @@ void World::place_countries() {
         try {
             current_country->setAnchorPoint(grid.place_country(*current_country));
         } catch (const std::runtime_error& e){
-            std::cout << "Country " << current_country->getName() << " skipping placement." << std::endl;
+            if (my_rank == 0)
+                std::cout << "Country " << current_country->getName() << " does not fit into the given world, not placed." << std::endl;
             countries.erase(countries.begin() + i);
             i--;
             number_of_countries--;
@@ -43,7 +44,7 @@ World::World(InputParser &inputParser, MpiHandler &mpiHandler) :
     velocity(inputParser.getVelocity()),
     maximumSpreadingDistance(inputParser.getMaximumSpreadingDistance()),
     timeStep(inputParser.getTimeStep()){
-    place_countries();
+    place_countries(mpiHandler.getMyRank());
     day_length = std::floor(86400 / inputParser.getTimeStep());
     addIndividuals(mpiHandler.split_individuals(inputParser), std::floor(inputParser.getInfectedNumber() / mpiHandler.getWorldSize()), mpiHandler.getMyRank());
 }
@@ -198,7 +199,14 @@ Country* World::findCountry(Individual &individual){
                 return &country;
         }
     }
-    std::string error = "\n\nIndividual " + individual.getId() + " with position " + point.toString() + " does not belong to any country\n\n";
+    std:: string state;
+    if (individual.immune())
+        state="immune";
+    else if (individual.infected())
+        state="infected";
+    else if (!individual.infected() && !individual.immune())
+        state="susceptible";
+    std::string error = "\nIndividual " + individual.getId() + " is " + state + " and does not belong to any country\n";
     throw std::runtime_error(error);
 }
 

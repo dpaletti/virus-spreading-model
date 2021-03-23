@@ -6,7 +6,6 @@
 #include "JsonHandler.h"
 
 int main(int argc, char** argv) {
-
     MPI_Init(nullptr, nullptr);
 
     int mpiWorldSize;
@@ -15,12 +14,12 @@ int main(int argc, char** argv) {
     int my_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
-    MpiHandler mpiHandler = MpiHandler(my_rank, mpiWorldSize);
-    InputParser inputParser = InputParser("../config/input.json");
+    MpiHandler mpiHandler = MpiHandler(my_rank, mpiWorldSize, MPI_COMM_WORLD);
+    InputParser inputParser = InputParser("./config/input.json");
     World world = World(inputParser, mpiHandler);
 
     JsonHandler jsonHandler = JsonHandler();
-    // Infected list
+
 
     for(int step = 0; step < world.getDayLength(); step++){
         world.updatePositions();
@@ -45,7 +44,8 @@ int main(int argc, char** argv) {
     mpiHandler.broadcast();
 
     jsonHandler.update_stats(mpiHandler.getReceivedMessage(), &world);
-    world.printStats();
+    if (my_rank == 0)
+        world.printStats();
 
 
 

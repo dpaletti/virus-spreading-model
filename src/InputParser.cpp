@@ -7,6 +7,10 @@
 
 InputParser::InputParser(const std::string& file_path) {
     std::ifstream t(file_path);
+    if (!t.good()){
+        printf("\n\n Could not find configuration file at %s\n\n", file_path.c_str());
+        abort();
+    }
     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
     const char* file_content = str.c_str();
     document.Parse(file_content);
