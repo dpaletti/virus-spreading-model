@@ -7,9 +7,19 @@
 #include "rapidjson/document.h"
 #include "Contact.h"
 class Contact;
+/**
+ * Other representation of an infected individual, with minimal information. Used to exchange information about the infected
+ * in messages.
+ */
 class Infected {
 private:
+    /**
+     * Position of the infected individual in the world
+     */
     Point position = Point();
+    /**
+     * id of the infected individual
+     */
     std::string id = "";
 public:
     Infected();

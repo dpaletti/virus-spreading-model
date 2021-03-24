@@ -7,10 +7,17 @@
 #include <vector>
 #include <list>
 
-
+/**
+ * Country represents each country in the world, and has information about its: dimensions, name, position in the world
+ * infected, immune and susceptible count
+ */
 class Country {
 public:
-
+    /**
+     * @param name
+     * @param length
+     * @param width
+     */
     Country(std::string name, float length, float width);
 
     Country();
@@ -47,6 +54,9 @@ public:
 private:
     std::string name;
     float length{}, width{};
+    /**
+     * Point where the country is positioned in the world
+     */
     Point anchor_point;
     int immune_count = 0;
 public:

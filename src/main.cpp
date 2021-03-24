@@ -5,6 +5,16 @@
 #include "MpiHandler.h"
 #include "JsonHandler.h"
 
+/*! \mainpage
+ *
+ * \section Introduction
+ *
+ * \section Implementation
+ *
+ * \section Profiling
+ *
+ * etc...
+ */
 int main(int argc, char** argv) {
     MPI_Init(nullptr, nullptr);
 

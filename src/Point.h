@@ -7,6 +7,9 @@
 #include "rapidjson/document.h"
 #include <exception>
 
+/**
+ * Class used to represent points in the world as well as direction of individuals.
+ */
 class Point {
 private:
     float x, y;

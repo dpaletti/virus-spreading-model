@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 project (virus-spreading-model VERSION 1.0)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 
 add_executable(virus-spreading src/main.cpp src/Country.cpp src/Country.h src/World.cpp src/World.h src/Point.cpp src/Point.h src/Cell.cpp src/Cell.h src/Grid.cpp src/Grid.h src/InputParser.cpp src/InputParser.h src/Individual.cpp src/Individual.h src/Infected.cpp src/Infected.h src/Contact.cpp src/Contact.h src/MpiHandler.cpp src/MpiHandler.h src/JsonHandler.cpp src/JsonHandler.h)
 

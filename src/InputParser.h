@@ -4,7 +4,9 @@
 #include "rapidjson/document.h"
 #include <list>
 
-
+/**
+ * Used to parse the config file containing the inputs. Leverages the rapidJson library.
+ */
 class InputParser {
 public:
     InputParser(const std::string& file_path);

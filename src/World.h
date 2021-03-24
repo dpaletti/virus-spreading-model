@@ -10,7 +10,10 @@
 #include "MpiHandler.h"
 
 class MpiHandler;
-
+/**
+ * Used to represent the world. Has the information about geographical and physical quantities, as well as
+ * virus properties and list of infected, individuals and countries.
+ */
 class World {
 private:
     bool update_contacts_intersection(Individual *individual, std::vector<Infected> current_intersection) const;
@@ -43,6 +46,10 @@ public:
 
     float getWidth() const;
 
+    /**
+     * Used to place the countries received in input into the world
+     * @param my_rank Rank of the calling process
+     */
     void place_countries(int my_rank);
 
     const std::vector<Individual> &getIndividuals() const;
@@ -51,12 +58,18 @@ public:
 
     void addIndividuals(int number_of_individuals, int number_of_infected, int rank);
 
+    /**
+     * Used to update the positions of the individuals in the world at each timestep
+     */
     void updatePositions();
 
     float getMaximumSpreadingDistance() const;
 
     float getTimeStep() const;
 
+    /**
+     * Used to spread the virus at each timestep between the individuals of the world.
+     */
     void spread_virus();
 
     void buildInfectedList();
@@ -71,6 +84,11 @@ public:
 
     static int getInfectedToImmune();
 
+    /**
+     * Used to find the country where an individual is in
+     * @param individual individual to search the country for
+     * @return The searched country
+     */
     Country *findCountry(Individual &individual);
 
     void computeStats();
@@ -79,7 +97,15 @@ public:
 
     int getDayLength() const;
 
+    /**
+     * Used to find a country by name
+     * @param country_name
+     * @return
+     */
     Country *findCountryByName(const std::string& country_name);
+    /**
+     * Used to print to screen all the relevant stats for each country: country name, immune count, susceptible count, infected count.
+     */
     void printStats();
 
 };

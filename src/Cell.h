@@ -4,10 +4,12 @@
 
 #include "Point.h"
 
+/**
+ * Cell class represent a cell in the grid that constitutes the world
+ */
 class Cell {
 public:
     /**
-     * Cell class represent a cell in the grid that constitutes the world
      * @param anchorPoint
      * @param length
      * @param width
