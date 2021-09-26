@@ -16,11 +16,17 @@ class MpiHandler;
  */
 class World {
 private:
+public:
+    int getDays() const;
+
+private:
+
     bool update_contacts_intersection(Individual *individual, std::vector<Infected> current_intersection) const;
 
     bool update_contacts_difference(bool transmission, Individual *individual,
                                     const std::vector<Infected> &current_difference) const;
 
+    int days;
     float velocity;
     float maximumSpreadingDistance;
     float timeStep;
@@ -38,6 +44,8 @@ private:
     std::vector<Country> countries;
 
 public:
+    void reset_stats();
+
     World(InputParser &inputParser, MpiHandler &mpiHandler);
 
     const std::vector<Country> &getCountries() const;
@@ -94,6 +102,7 @@ public:
     void computeStats();
 
     static int getImmuneToSusceptible();
+
 
     int getDayLength() const;
 

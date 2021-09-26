@@ -26,6 +26,7 @@ void World::place_countries(int my_rank) {
     for(int i = 0; i < number_of_countries; i++){
         current_country = (Country*) &countries[i];
         try {
+            //printf("\n\n\n\nTrying to place country number %d, with width %f and length %f , number of countries is: %d",i,current_country->getWidth(),current_country->getLength(),number_of_countries);
             current_country->setAnchorPoint(grid.place_country(*current_country));
         } catch (const std::runtime_error& e){
             if (my_rank == 0)
@@ -38,6 +39,7 @@ void World::place_countries(int my_rank) {
 }
 
 World::World(InputParser &inputParser, MpiHandler &mpiHandler) :
+    days(inputParser.getDays()),
     length(inputParser.getWorldSize().second),
     width(inputParser.getWorldSize().first),
     countries(std::move(Country::buildCountries(inputParser.getCountries()))),
@@ -238,10 +240,18 @@ Country *World::findCountryByName(const std::string& country_name) {
 }
 
 void World::printStats() {
-    for (auto &c : countries) {
+    for (auto &c : countries)
         c.printStats();
-        c.resetCounters();
-    }
+}
+
+int World::getDays() const {
+    return days;
+}
+
+void World::reset_stats() {
+    for (auto &country : countries)
+        country.resetCounters();
+
 }
 
 

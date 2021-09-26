@@ -1,6 +1,7 @@
 #include "Grid.h"
 #include <list>
 #include <stdexcept>
+#include <iostream>
 
 
 Grid::Grid(int number_of_countries, float world_length, float world_width){
@@ -215,9 +216,9 @@ bool Grid::fit_length_width(int cell_to_fill_row, int cell_to_fill_column, Count
     }
 
     if (acc_width != country.getWidth())
-        add_row(last_row, last_col, country, acc_width - (*filled_cells_width.end())->getWidth());
+        add_row(last_row, last_col, country, acc_width - (*filled_cells_width.back()).getWidth());
     if (acc_length != country.getLength())
-        add_column(last_row, last_col, country, acc_length - filled_cells_length.end()->first->getLength());
+        add_column(last_row, last_col, country, acc_length - filled_cells_length.back().first->getLength());
     for (auto &item : filled_cells_length)
         item.first->setIsOccupied(true);
 

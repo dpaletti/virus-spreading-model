@@ -37,6 +37,8 @@ public:
 
     bool equals(Cell a);
 
+    std :: string toString();
+
 private:
     /**
      * Represent where the cell is anchored in the grid

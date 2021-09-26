@@ -32,7 +32,7 @@ public:
 
     void setAnchorPoint(const Point &anchorPoint);
 
-    static std::vector<Country>buildCountries(std::list<std::pair<float, float>> countries);
+    static std::vector<Country>buildCountries(const std::list<std::pair<float, float>>& countries);
 
     void updateImmuneCount();
 

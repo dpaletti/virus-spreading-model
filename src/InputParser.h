@@ -17,7 +17,7 @@ public:
     float getVelocity();
     float getMaximumSpreadingDistance();
     float getTimeStep();
-
+    int getDays();
 private:
     rapidjson::Document document;
 

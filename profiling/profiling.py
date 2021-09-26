@@ -151,8 +151,8 @@ def country_generator(config, percentage):
 if __name__ == "__main__":
     input_initialization(
         CONFIG_PATH,
-        individuals_number=300,
-        infected_number=30,
+        individuals_number=100,
+        infected_number=10,
         world_width=500,
         world_length=500,
         country_number=150,

@@ -41,3 +41,9 @@ Cell::Cell() {}
 bool Cell::equals(Cell a) {
     return a.getAnchorPoint().equals(getAnchorPoint());
 }
+
+std::string Cell::toString() {
+    std :: string cell = "Cell at " + anchor_point.toString() + "of dimensions (" +
+            std::to_string(width) + "," + std::to_string(length) + ")" + "with occupied: " + std:: to_string(is_occupied);
+    return cell;
+}

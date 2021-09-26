@@ -33,7 +33,7 @@ Country::Country(std::string name, float length, float width) :  name(std::move(
                                                                         anchor_point()
                                                                         {}
 
-std::vector<Country> Country::buildCountries(std::list<std::pair<float, float>> countries) {
+std::vector<Country> Country::buildCountries(const std::list<std::pair<float, float>>& countries) {
     std::vector<Country> out {};
     int i = 0;
     for(auto const& value: countries) {

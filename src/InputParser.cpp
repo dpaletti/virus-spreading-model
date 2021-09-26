@@ -50,3 +50,7 @@ float InputParser::getMaximumSpreadingDistance() {
 float InputParser::getTimeStep() {
     return document["time_step"].GetFloat();
 }
+
+int InputParser::getDays() {
+    return document["days"].GetInt();
+}
