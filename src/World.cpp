@@ -86,7 +86,7 @@ void World::updatePositions() {
     }
 }
 
-const std::vector<Individual> &World::getIndividuals() const {
+std::vector<Individual> &World::getIndividuals(){
     return individuals;
 }
 
@@ -151,7 +151,7 @@ void World::spread_virus (){
     std::pair<std::vector<Infected>, std::vector<Infected>> intersection_and_difference;
     bool transmission;
 
-    for (Individual individual : getIndividuals()) {
+    for (Individual &individual : getIndividuals()) {
         intersection_and_difference = individual.getIntersectionAndDifference(infected_list);
         current_intersection = intersection_and_difference.first;
         current_difference = intersection_and_difference.second;

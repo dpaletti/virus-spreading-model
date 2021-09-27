@@ -60,7 +60,7 @@ public:
      */
     void place_countries(int my_rank);
 
-    const std::vector<Individual> &getIndividuals() const;
+    std::vector<Individual> &getIndividuals();
 
     void printWorld();
 
